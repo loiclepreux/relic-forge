@@ -5,10 +5,13 @@ import {
     calculatePassiveProduction,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
+import { loadForgeState, saveForgeState } from "./game/forgeSave";
 import "./App.css";
 
 function App() {
-    const [forge, setForge] = useState(initialForgeState);
+    const [forge, setForge] = useState(() => {
+        return loadForgeState() ?? initialForgeState;
+    });
 
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
@@ -17,6 +20,10 @@ function App() {
 
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
+
+    useEffect(() => {
+        saveForgeState(forge);
+    }, [forge]);
 
     useEffect(() => {
         const interval = setInterval(() => {
