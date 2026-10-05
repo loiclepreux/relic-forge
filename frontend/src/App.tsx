@@ -3,30 +3,36 @@ import {
     calculateForgeUpgradeCost,
     calculateStrikeGain,
 } from "./game/forgeEconomy";
+import { initialForgeState } from "./game/forgeState";
 import "./App.css";
 
 function App() {
-    const [echoes, setEchoes] = useState(0);
-    const [forgeForce, setForgeForce] = useState(0);
+    const [forge, setForge] = useState(initialForgeState);
 
     const baseStrikeGain = 1;
-    const strikeGain = calculateStrikeGain(baseStrikeGain, forgeForce);
-    const forgeUpgradeCost = calculateForgeUpgradeCost(forgeForce);
+    const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
+    const forgeUpgradeCost = calculateForgeUpgradeCost(forge.forgeForce);
 
-    const displayedEchoes = echoes.toFixed(2);
+    const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
 
     function strikeForge() {
-        setEchoes((currentEchoes) => currentEchoes + strikeGain);
+        setForge((currentForge) => ({
+            ...currentForge,
+            echoes: currentForge.echoes + strikeGain,
+        }));
     }
 
     function upgradeForge() {
-        if (echoes < forgeUpgradeCost) {
+        if (forge.echoes < forgeUpgradeCost) {
             return;
         }
 
-        setEchoes((currentEchoes) => currentEchoes - forgeUpgradeCost);
-        setForgeForce((currentForce) => currentForce + 1);
+        setForge((currentForge) => ({
+            ...currentForge,
+            echoes: currentForge.echoes - forgeUpgradeCost,
+            forgeForce: currentForge.forgeForce + 1,
+        }));
     }
 
     return (
@@ -39,12 +45,12 @@ function App() {
             <section className="forge">
                 <p className="forge-label">FORGE PRIMORDIALE</p>
 
-                <p>Force de Forge : {forgeForce}</p>
+                <p>Force de Forge : {forge.forgeForce}</p>
 
                 <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
 
                 <h2>
-                    {displayedEchoes} {echoes > 1 ? "Échos" : "Écho"}
+                    {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
                 </h2>
 
                 <button
@@ -58,7 +64,7 @@ function App() {
                 <button
                     type="button"
                     onClick={upgradeForge}
-                    disabled={echoes < forgeUpgradeCost}
+                    disabled={forge.echoes < forgeUpgradeCost}
                 >
                     Améliorer la Forge — {forgeUpgradeCost} Échos
                 </button>
