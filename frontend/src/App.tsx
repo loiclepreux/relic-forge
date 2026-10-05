@@ -1,122 +1,66 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [echoes, setEchoes] = useState(0);
+    const [forgeForce, setForgeForce] = useState(0);
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    const baseStrikeGain = 1;
+    const strikeGain = baseStrikeGain * (1 + 0.15 * forgeForce);
+    const forgeUpgradeCost = Math.ceil(25 * 1.18 ** forgeForce);
 
-      <div className="ticks"></div>
+    const displayedEchoes = echoes.toFixed(2);
+    const displayedStrikeGain = strikeGain.toFixed(2);
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+    function strikeForge() {
+        setEchoes((currentEchoes) => currentEchoes + strikeGain);
+    }
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    function upgradeForge() {
+        if (echoes < forgeUpgradeCost) {
+            return;
+        }
+
+        setEchoes((currentEchoes) => currentEchoes - forgeUpgradeCost);
+        setForgeForce((currentForce) => currentForce + 1);
+    }
+
+    return (
+        <main className="forge-page">
+            <header className="forge-header">
+                <h1>RELIC FORGE</h1>
+                <p>Chaque clic peut révéler une légende.</p>
+            </header>
+
+            <section className="forge">
+                <p className="forge-label">FORGE PRIMORDIALE</p>
+
+                <p>Force de Forge : {forgeForce}</p>
+
+                <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
+
+                <h2>
+                    {displayedEchoes} {echoes > 1 ? "Échos" : "Écho"}
+                </h2>
+
+                <button
+                    type="button"
+                    className="forge-button"
+                    onClick={strikeForge}
+                >
+                    Frapper
+                </button>
+
+                <button
+                    type="button"
+                    onClick={upgradeForge}
+                    disabled={echoes < forgeUpgradeCost}
+                >
+                    Améliorer la Forge — {forgeUpgradeCost} Échos
+                </button>
+            </section>
+        </main>
+    );
 }
 
-export default App
+export default App;
