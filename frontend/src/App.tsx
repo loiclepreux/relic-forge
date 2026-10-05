@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     calculateForgeUpgradeCost,
     calculateStrikeGain,
+    calculatePassiveProduction,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
 import "./App.css";
@@ -12,9 +13,23 @@ function App() {
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
     const forgeUpgradeCost = calculateForgeUpgradeCost(forge.forgeForce);
+    const passiveProduction = calculatePassiveProduction(forge.forgeForce);
 
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setForge((currentForge) => ({
+                ...currentForge,
+                echoes: currentForge.echoes + passiveProduction,
+            }));
+        }, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [passiveProduction]);
 
     function strikeForge() {
         setForge((currentForge) => ({
@@ -46,8 +61,10 @@ function App() {
                 <p className="forge-label">FORGE PRIMORDIALE</p>
 
                 <p>Force de Forge : {forge.forgeForce}</p>
-
                 <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
+                <p>
+                    Production passive : {passiveProduction.toFixed(2)} Écho/s
+                </p>
 
                 <h2>
                     {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}

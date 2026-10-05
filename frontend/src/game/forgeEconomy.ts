@@ -8,3 +8,7 @@ export function calculateStrikeGain(
 ): number {
     return baseStrikeGain * (1 + 0.15 * forgeForce);
 }
+
+export function calculatePassiveProduction(forgeForce: number): number {
+    return forgeForce * 0.1;
+}
