@@ -1,4 +1,8 @@
 import { useState } from "react";
+import {
+    calculateForgeUpgradeCost,
+    calculateStrikeGain,
+} from "./game/forgeEconomy";
 import "./App.css";
 
 function App() {
@@ -6,8 +10,8 @@ function App() {
     const [forgeForce, setForgeForce] = useState(0);
 
     const baseStrikeGain = 1;
-    const strikeGain = baseStrikeGain * (1 + 0.15 * forgeForce);
-    const forgeUpgradeCost = Math.ceil(25 * 1.18 ** forgeForce);
+    const strikeGain = calculateStrikeGain(baseStrikeGain, forgeForce);
+    const forgeUpgradeCost = calculateForgeUpgradeCost(forgeForce);
 
     const displayedEchoes = echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
