@@ -93,8 +93,8 @@ function App() {
                 <p>Chaque clic peut révéler une légende.</p>
             </header>
 
-            <section className="forge">
-                <p className="forge-label">FORGE PRIMORDIALE</p>
+            <section className={`forge forge-stage-${forgeStage}`}>
+                <p className="forge-label">{forgeStageName.toUpperCase()}</p>
 
                 <p>Force de Forge : {forge.forgeForce}</p>
                 <p>Stade de Forge : {forgeStage}</p>
@@ -111,7 +111,7 @@ function App() {
 
                 <button
                     type="button"
-                    className="forge-button"
+                    className={`forge-button forge-button-stage-${forgeStage}`}
                     onClick={handleStrike}
                 >
                     Frapper
