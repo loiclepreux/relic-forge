@@ -25,3 +25,19 @@ export function calculateOfflineGain(
 export function normalizeEchoes(value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100;
 }
+
+export function getForgeStage(forgeForce: number): number {
+    if (forgeForce >= 20) {
+        return 4;
+    }
+
+    if (forgeForce >= 10) {
+        return 3;
+    }
+
+    if (forgeForce >= 5) {
+        return 2;
+    }
+
+    return 1;
+}

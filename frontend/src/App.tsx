@@ -5,6 +5,7 @@ import {
     calculatePassiveProduction,
     calculateOfflineGain,
     normalizeEchoes,
+    getForgeStage,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
 import {
@@ -47,6 +48,7 @@ function App() {
     const passiveProduction = calculatePassiveProduction(forge.forgeForce);
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
+    const forgeStage = getForgeStage(forge.forgeForce);
 
     useEffect(() => {
         if (isFirstSave.current) {
@@ -93,6 +95,8 @@ function App() {
                 <p className="forge-label">FORGE PRIMORDIALE</p>
 
                 <p>Force de Forge : {forge.forgeForce}</p>
+                <p>Stade de Forge : {forgeStage}</p>
+
                 <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
                 <p>
                     Production passive : {passiveProduction.toFixed(2)} Écho/s
