@@ -1,17 +1,44 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     calculateForgeUpgradeCost,
     calculateStrikeGain,
     calculatePassiveProduction,
+    calculateOfflineGain,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
-import { loadForgeState, saveForgeState } from "./game/forgeSave";
+import {
+    loadForgeState,
+    saveForgeState,
+    calculateOfflineSeconds,
+} from "./game/forgeSave";
 import "./App.css";
 
 function App() {
     const [forge, setForge] = useState(() => {
-        return loadForgeState() ?? initialForgeState;
+        const loadedSave = loadForgeState();
+
+        if (loadedSave === null) {
+            return initialForgeState;
+        }
+
+        const offlineSeconds = calculateOfflineSeconds(loadedSave.savedAt);
+
+        const offlineProduction = calculatePassiveProduction(
+            loadedSave.forge.forgeForce,
+        );
+
+        const offlineGain = calculateOfflineGain(
+            offlineProduction,
+            offlineSeconds,
+        );
+
+        return {
+            ...loadedSave.forge,
+            echoes: loadedSave.forge.echoes + offlineGain,
+        };
     });
+
+    const isFirstSave = useRef(true);
 
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
@@ -22,6 +49,11 @@ function App() {
     const displayedStrikeGain = strikeGain.toFixed(2);
 
     useEffect(() => {
+        if (isFirstSave.current) {
+            isFirstSave.current = false;
+            return;
+        }
+
         saveForgeState(forge);
     }, [forge]);
 

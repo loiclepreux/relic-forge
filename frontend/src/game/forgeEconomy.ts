@@ -12,3 +12,12 @@ export function calculateStrikeGain(
 export function calculatePassiveProduction(forgeForce: number): number {
     return forgeForce * 0.1;
 }
+
+export function calculateOfflineGain(
+    passiveProduction: number,
+    offlineSeconds: number,
+): number {
+    const offlineEfficiency = 0.5;
+
+    return passiveProduction * offlineSeconds * offlineEfficiency;
+}
