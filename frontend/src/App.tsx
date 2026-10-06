@@ -6,6 +6,7 @@ import {
     calculateOfflineGain,
     normalizeEchoes,
     getForgeStage,
+    getForgeStageName,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
 import {
@@ -49,6 +50,7 @@ function App() {
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
     const forgeStage = getForgeStage(forge.forgeForce);
+    const forgeStageName = getForgeStageName(forgeStage);
 
     useEffect(() => {
         if (isFirstSave.current) {
@@ -96,6 +98,7 @@ function App() {
 
                 <p>Force de Forge : {forge.forgeForce}</p>
                 <p>Stade de Forge : {forgeStage}</p>
+                <p>État de la Forge : {forgeStageName}</p>
 
                 <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
                 <p>

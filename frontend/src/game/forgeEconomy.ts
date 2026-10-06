@@ -41,3 +41,22 @@ export function getForgeStage(forgeForce: number): number {
 
     return 1;
 }
+
+export function getForgeStageName(forgeStage: number): string {
+    switch (forgeStage) {
+        case 1:
+            return "Forge Éteinte";
+
+        case 2:
+            return "Forge Éveillée";
+
+        case 3:
+            return "Forge Ardente";
+
+        case 4:
+            return "Forge Primordiale";
+
+        default:
+            return "Forge Éteinte";
+    }
+}
