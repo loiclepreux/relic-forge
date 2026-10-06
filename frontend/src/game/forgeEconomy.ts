@@ -21,3 +21,7 @@ export function calculateOfflineGain(
 
     return passiveProduction * offlineSeconds * offlineEfficiency;
 }
+
+export function normalizeEchoes(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+}

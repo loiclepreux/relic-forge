@@ -4,6 +4,7 @@ import {
     calculateStrikeGain,
     calculatePassiveProduction,
     calculateOfflineGain,
+    normalizeEchoes,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
 import {
@@ -34,17 +35,15 @@ function App() {
 
         return {
             ...loadedSave.forge,
-            echoes: loadedSave.forge.echoes + offlineGain,
+            echoes: normalizeEchoes(loadedSave.forge.echoes + offlineGain),
         };
     });
 
     const isFirstSave = useRef(true);
-
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
     const forgeUpgradeCost = calculateForgeUpgradeCost(forge.forgeForce);
     const passiveProduction = calculatePassiveProduction(forge.forgeForce);
-
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
 
@@ -61,7 +60,9 @@ function App() {
         const interval = setInterval(() => {
             setForge((currentForge) => ({
                 ...currentForge,
-                echoes: currentForge.echoes + passiveProduction,
+                echoes: normalizeEchoes(
+                    currentForge.echoes + passiveProduction,
+                ),
             }));
         }, 1000);
 
@@ -73,7 +74,7 @@ function App() {
     function strikeForge() {
         setForge((currentForge) => ({
             ...currentForge,
-            echoes: currentForge.echoes + strikeGain,
+            echoes: normalizeEchoes(currentForge.echoes + strikeGain),
         }));
     }
 
@@ -84,7 +85,7 @@ function App() {
 
         setForge((currentForge) => ({
             ...currentForge,
-            echoes: currentForge.echoes - forgeUpgradeCost,
+            echoes: normalizeEchoes(currentForge.echoes - forgeUpgradeCost),
             forgeForce: currentForge.forgeForce + 1,
         }));
     }
