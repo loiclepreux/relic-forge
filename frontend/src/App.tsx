@@ -12,6 +12,7 @@ import {
     saveForgeState,
     calculateOfflineSeconds,
 } from "./game/forgeSave";
+import { strikeForge, upgradeForge } from "./game/forgeActions";
 import "./App.css";
 
 function App() {
@@ -71,23 +72,14 @@ function App() {
         };
     }, [passiveProduction]);
 
-    function strikeForge() {
-        setForge((currentForge) => ({
-            ...currentForge,
-            echoes: normalizeEchoes(currentForge.echoes + strikeGain),
-        }));
+    function handleStrike() {
+        setForge((currentForge) => strikeForge(currentForge, baseStrikeGain));
     }
 
-    function upgradeForge() {
-        if (forge.echoes < forgeUpgradeCost) {
-            return;
-        }
-
-        setForge((currentForge) => ({
-            ...currentForge,
-            echoes: normalizeEchoes(currentForge.echoes - forgeUpgradeCost),
-            forgeForce: currentForge.forgeForce + 1,
-        }));
+    function handleUpgrade() {
+        setForge((currentForge) =>
+            upgradeForge(currentForge, forgeUpgradeCost),
+        );
     }
 
     return (
@@ -113,14 +105,14 @@ function App() {
                 <button
                     type="button"
                     className="forge-button"
-                    onClick={strikeForge}
+                    onClick={handleStrike}
                 >
                     Frapper
                 </button>
 
                 <button
                     type="button"
-                    onClick={upgradeForge}
+                    onClick={handleUpgrade}
                     disabled={forge.echoes < forgeUpgradeCost}
                 >
                     Améliorer la Forge — {forgeUpgradeCost} Échos
