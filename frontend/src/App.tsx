@@ -42,6 +42,8 @@ function App() {
         };
     });
 
+    const [isStriking, setIsStriking] = useState(false);
+    const [showStrikeGain, setShowStrikeGain] = useState(false);
     const isFirstSave = useRef(true);
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
@@ -77,7 +79,18 @@ function App() {
     }, [passiveProduction]);
 
     function handleStrike() {
+        setIsStriking(true);
+        setShowStrikeGain(true);
+
         setForge((currentForge) => strikeForge(currentForge, baseStrikeGain));
+
+        window.setTimeout(() => {
+            setIsStriking(false);
+        }, 120);
+
+        window.setTimeout(() => {
+            setShowStrikeGain(false);
+        }, 600);
     }
 
     function handleUpgrade() {
@@ -103,7 +116,11 @@ function App() {
                 <p>Chaque clic peut révéler une légende.</p>
             </header>
 
-            <section className={`forge forge-stage-${forgeStage}`}>
+            <section
+                className={`forge forge-stage-${forgeStage} ${
+                    isStriking ? "forge-striking" : ""
+                }`}
+            >
                 <p className="forge-label">{forgeStageName.toUpperCase()}</p>
 
                 <p>Force de Forge : {forge.forgeForce}</p>
@@ -118,6 +135,12 @@ function App() {
                 <h2>
                     {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
                 </h2>
+
+                {showStrikeGain && (
+                    <span className="strike-gain">
+                        +{displayedStrikeGain} Écho
+                    </span>
+                )}
 
                 <button
                     type="button"

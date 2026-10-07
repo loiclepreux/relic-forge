@@ -2,7 +2,45 @@
     transition:
         background-color 0.4s ease,
         border-color 0.4s ease,
-        box-shadow 0.4s ease;
+        box-shadow 0.4s ease,
+        transform 0.08s ease,
+        filter 0.08s ease;
+}
+
+.forge-striking {
+    transform: scale(0.985);
+    filter: brightness(1.35);
+}
+
+.strike-gain {
+    display: block;
+    margin: 6px 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+    pointer-events: none;
+    animation: strike-gain-pop 0.6s ease-out;
+}
+
+@keyframes strike-gain-pop {
+    0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.9);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translateY(0) scale(1.05);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateY(-6px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.95);
+    }
 }
 
 .forge-button {
