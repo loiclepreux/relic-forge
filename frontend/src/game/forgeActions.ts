@@ -27,3 +27,10 @@ export function upgradeForge(
         forgeForce: forge.forgeForce + 1,
     };
 }
+
+export function resetForge(): ForgeState {
+    return {
+        echoes: 0,
+        forgeForce: 0,
+    };
+}

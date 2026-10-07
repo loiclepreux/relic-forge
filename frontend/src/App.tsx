@@ -14,7 +14,7 @@ import {
     saveForgeState,
     calculateOfflineSeconds,
 } from "./game/forgeSave";
-import { strikeForge, upgradeForge } from "./game/forgeActions";
+import { strikeForge, upgradeForge, resetForge } from "./game/forgeActions";
 import "./App.css";
 
 function App() {
@@ -86,6 +86,18 @@ function App() {
         );
     }
 
+    function handleReset() {
+        const shouldReset = window.confirm(
+            "Réinitialiser complètement la Forge ? Cette action effacera la progression actuelle.",
+        );
+
+        if (!shouldReset) {
+            return;
+        }
+
+        setForge(resetForge());
+    }
+
     return (
         <main className="forge-page">
             <header className="forge-header">
@@ -123,6 +135,10 @@ function App() {
                     disabled={forge.echoes < forgeUpgradeCost}
                 >
                     Améliorer la Forge — {forgeUpgradeCost} Échos
+                </button>
+
+                <button type="button" onClick={handleReset}>
+                    Reset Forge (DEV)
                 </button>
             </section>
         </main>
