@@ -1,4 +1,8 @@
-import { calculateStrikeGain, normalizeEchoes } from "./forgeEconomy";
+import {
+    calculateStrikeGain,
+    normalizeEchoes,
+    calculateForgeUpgradeCost,
+} from "./forgeEconomy";
 import type { ForgeState } from "./forgeState";
 
 export function strikeForge(
@@ -13,10 +17,9 @@ export function strikeForge(
     };
 }
 
-export function upgradeForge(
-    forge: ForgeState,
-    upgradeCost: number,
-): ForgeState {
+export function upgradeForge(forge: ForgeState): ForgeState {
+    const upgradeCost = calculateForgeUpgradeCost(forge.forgeForce);
+
     if (forge.echoes < upgradeCost) {
         return forge;
     }

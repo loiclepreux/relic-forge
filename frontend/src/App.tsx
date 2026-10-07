@@ -81,9 +81,7 @@ function App() {
     }
 
     function handleUpgrade() {
-        setForge((currentForge) =>
-            upgradeForge(currentForge, forgeUpgradeCost),
-        );
+        setForge((currentForge) => upgradeForge(currentForge));
     }
 
     function handleReset() {
