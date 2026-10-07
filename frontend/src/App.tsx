@@ -132,6 +132,17 @@ function App() {
                     Production passive : {passiveProduction.toFixed(2)} Écho/s
                 </p>
 
+                <button
+                    type="button"
+                    className={`forge-core forge-core-stage-${forgeStage} ${
+                        isStriking ? "forge-core-striking" : ""
+                    }`}
+                    onClick={handleStrike}
+                    aria-label="Frapper la Forge"
+                >
+                    <span className="forge-core-symbol">✦</span>
+                </button>
+
                 <h2>
                     {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
                 </h2>

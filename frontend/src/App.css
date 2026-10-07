@@ -50,6 +50,54 @@
         box-shadow 0.2s ease;
 }
 
+/* //////////////// forge ///////////////////// */
+
+.forge-core {
+    width: 140px;
+    height: 140px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #52525b;
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(63, 63, 70, 0.8) 0%,
+        rgba(24, 24, 27, 0.95) 70%
+    );
+
+    color: #f4f4f5;
+    cursor: pointer;
+
+    transition:
+        transform 0.1s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.forge-core-symbol {
+    font-size: 3rem;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.forge-core-striking {
+    transform: scale(0.92);
+    filter: brightness(1.5);
+}
+
+.forge-core:hover {
+    transform: scale(1.04);
+    filter: brightness(1.15);
+}
+
+.forge-core:active {
+    transform: scale(0.92);
+}
+
 /* //////////////// stage 1 ///////////////////// */
 
 .forge-stage-1 {
@@ -72,6 +120,26 @@
 .forge-button-stage-1:active {
     transform: scale(0.97);
     box-shadow: 0 0 16px rgba(113, 113, 122, 0.35);
+}
+
+.forge-core-stage-1 {
+    border-color: #52525b;
+
+    background: radial-gradient(
+        circle,
+        rgba(82, 82, 91, 0.35) 0%,
+        rgba(39, 39, 42, 0.55) 40%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    box-shadow:
+        0 0 8px rgba(82, 82, 91, 0.18),
+        inset 0 0 18px rgba(0, 0, 0, 0.35);
+}
+
+.forge-core-stage-1 .forge-core-symbol {
+    color: #a1a1aa;
+    text-shadow: 0 0 5px rgba(161, 161, 170, 0.25);
 }
 
 /* //////////////// stage 2 ///////////////////// */
@@ -100,6 +168,28 @@
     box-shadow: 0 0 20px rgba(217, 119, 6, 0.38);
 }
 
+.forge-core-stage-2 {
+    border-color: #a16207;
+
+    background: radial-gradient(
+        circle,
+        rgba(217, 119, 6, 0.4) 0%,
+        rgba(120, 53, 15, 0.45) 40%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    box-shadow:
+        0 0 12px rgba(217, 119, 6, 0.22),
+        0 0 24px rgba(161, 98, 7, 0.12);
+}
+
+.forge-core-stage-2 .forge-core-symbol {
+    color: #fde68a;
+    text-shadow:
+        0 0 6px rgba(253, 230, 138, 0.45),
+        0 0 12px rgba(217, 119, 6, 0.3);
+}
+
 /* //////////////// stage 3 ///////////////////// */
 
 .forge-stage-3 {
@@ -126,6 +216,28 @@
     box-shadow: 0 0 26px rgba(249, 115, 22, 0.5);
 }
 
+.forge-core-stage-3 {
+    border-color: #ea580c;
+
+    background: radial-gradient(
+        circle,
+        rgba(249, 115, 22, 0.55) 0%,
+        rgba(154, 52, 18, 0.55) 40%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    box-shadow:
+        0 0 18px rgba(249, 115, 22, 0.32),
+        0 0 36px rgba(234, 88, 12, 0.18);
+}
+
+.forge-core-stage-3 .forge-core-symbol {
+    color: #ffedd5;
+    text-shadow:
+        0 0 8px rgba(255, 237, 213, 0.6),
+        0 0 16px rgba(249, 115, 22, 0.45);
+}
+
 /* //////////////// stage 4 ///////////////////// */
 
 .forge-stage-4 {
@@ -150,4 +262,41 @@
 .forge-button-stage-4:active {
     transform: scale(0.97);
     box-shadow: 0 0 32px rgba(220, 38, 38, 0.55);
+}
+
+.forge-core-stage-4 {
+    border-color: #ef4444;
+
+    background: radial-gradient(
+        circle,
+        rgba(239, 68, 68, 0.55) 0%,
+        rgba(127, 29, 29, 0.55) 35%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    animation: forge-core-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes forge-core-pulse {
+    0%,
+    100% {
+        box-shadow:
+            0 0 18px rgba(239, 68, 68, 0.35),
+            0 0 40px rgba(220, 38, 38, 0.18);
+        filter: brightness(1);
+    }
+
+    50% {
+        box-shadow:
+            0 0 34px rgba(239, 68, 68, 0.65),
+            0 0 70px rgba(220, 38, 38, 0.4);
+        filter: brightness(1.12);
+    }
+}
+
+.forge-core-stage-4 .forge-core-symbol {
+    color: #fee2e2;
+    text-shadow:
+        0 0 8px rgba(254, 226, 226, 0.8),
+        0 0 18px rgba(239, 68, 68, 0.65);
 }
