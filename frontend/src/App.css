@@ -59,7 +59,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+    position: relative;
     border: 2px solid #52525b;
     border-radius: 50%;
 
@@ -96,6 +96,35 @@
 
 .forge-core:active {
     transform: scale(0.92);
+}
+
+.forge-impact-ring {
+    position: absolute;
+    inset: 0;
+
+    border: 2px solid rgba(255, 180, 100, 0.85);
+    border-radius: 50%;
+
+    opacity: 0;
+    transform: scale(0.85);
+
+    pointer-events: none;
+}
+
+.forge-impact-ring-active {
+    animation: forge-impact-wave 0.35s ease-out forwards;
+}
+
+@keyframes forge-impact-wave {
+    0% {
+        opacity: 0.9;
+        transform: scale(0.85);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
 }
 
 /* //////////////// stage 1 ///////////////////// */

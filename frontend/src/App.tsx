@@ -44,6 +44,8 @@ function App() {
 
     const [isStriking, setIsStriking] = useState(false);
     const [showStrikeGain, setShowStrikeGain] = useState(false);
+    const [impactRings, setImpactRings] = useState<number[]>([]);
+    const impactRingIdRef = useRef(0);
     const isFirstSave = useRef(true);
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
@@ -81,6 +83,16 @@ function App() {
     function handleStrike() {
         setIsStriking(true);
         setShowStrikeGain(true);
+
+        const newRingId = ++impactRingIdRef.current;
+
+        setImpactRings((currentRings) => [...currentRings, newRingId]);
+
+        window.setTimeout(() => {
+            setImpactRings((currentRings) =>
+                currentRings.filter((ringId) => ringId !== newRingId),
+            );
+        }, 350);
 
         setForge((currentForge) => strikeForge(currentForge, baseStrikeGain));
 
@@ -140,6 +152,13 @@ function App() {
                     onClick={handleStrike}
                     aria-label="Frapper la Forge"
                 >
+                    {impactRings.map((ringId) => (
+                        <span
+                            key={ringId}
+                            className="forge-impact-ring forge-impact-ring-active"
+                            aria-hidden="true"
+                        />
+                    ))}
                     <span className="forge-core-symbol">✦</span>
                 </button>
 
