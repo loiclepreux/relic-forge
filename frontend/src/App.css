@@ -111,6 +111,22 @@
     pointer-events: none;
 }
 
+.forge-impact-ring-stage-1 {
+    border-color: rgba(170, 180, 190, 0.75);
+}
+
+.forge-impact-ring-stage-2 {
+    border-color: rgba(255, 190, 80, 0.85);
+}
+
+.forge-impact-ring-stage-3 {
+    border-color: rgba(255, 110, 35, 0.9);
+}
+
+.forge-impact-ring-stage-4 {
+    border-color: rgba(255, 45, 45, 0.95);
+}
+
 .forge-impact-ring-active {
     animation: forge-impact-wave 0.35s ease-out forwards;
 }

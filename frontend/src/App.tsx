@@ -155,7 +155,7 @@ function App() {
                     {impactRings.map((ringId) => (
                         <span
                             key={ringId}
-                            className="forge-impact-ring forge-impact-ring-active"
+                            className={`forge-impact-ring forge-impact-ring-active forge-impact-ring-stage-${forgeStage}`}
                             aria-hidden="true"
                         />
                     ))}
