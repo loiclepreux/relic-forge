@@ -58,6 +58,10 @@ function App() {
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
     const forgeUpgradeCost = calculateForgeUpgradeCost(forge.forgeForce);
+    const upgradeProgress = Math.min(
+        100,
+        (forge.echoes / forgeUpgradeCost) * 100,
+    );
     const passiveProduction = calculatePassiveProduction(forge.forgeForce);
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
@@ -173,6 +177,18 @@ function App() {
                 <h2>
                     {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
                 </h2>
+
+                <div className="forge-upgrade-progress">
+                    <p>Progression vers la prochaine amélioration</p>
+
+                    <progress
+                        value={upgradeProgress}
+                        max={100}
+                        aria-label="Progression vers la prochaine amélioration"
+                    />
+
+                    <p>{upgradeProgress.toFixed(0)} %</p>
+                </div>
 
                 {offlineGainMessage !== null && (
                     <div className="forge-offline-message">
