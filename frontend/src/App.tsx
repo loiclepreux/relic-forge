@@ -17,35 +17,43 @@ import {
 import { strikeForge, upgradeForge, resetForge } from "./game/forgeActions";
 import "./App.css";
 
-function App() {
-    const [forge, setForge] = useState(() => {
-        const loadedSave = loadForgeState();
+function loadInitialForge() {
+    const loadedSave = loadForgeState();
 
-        if (loadedSave === null) {
-            return initialForgeState;
-        }
-
-        const offlineSeconds = calculateOfflineSeconds(loadedSave.savedAt);
-
-        const offlineProduction = calculatePassiveProduction(
-            loadedSave.forge.forgeForce,
-        );
-
-        const offlineGain = calculateOfflineGain(
-            offlineProduction,
-            offlineSeconds,
-        );
-
+    if (loadedSave === null) {
         return {
+            forge: initialForgeState,
+            offlineGain: 0,
+        };
+    }
+
+    const offlineSeconds = calculateOfflineSeconds(loadedSave.savedAt);
+
+    const offlineProduction = calculatePassiveProduction(
+        loadedSave.forge.forgeForce,
+    );
+
+    const offlineGain = calculateOfflineGain(offlineProduction, offlineSeconds);
+
+    return {
+        forge: {
             ...loadedSave.forge,
             echoes: normalizeEchoes(loadedSave.forge.echoes + offlineGain),
-        };
-    });
+        },
+        offlineGain,
+    };
+}
 
+function App() {
+    const [initialData] = useState(loadInitialForge);
+    const [forge, setForge] = useState(initialData.forge);
     const [isStriking, setIsStriking] = useState(false);
     const [showStrikeGain, setShowStrikeGain] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
+    const [offlineGainMessage, setOfflineGainMessage] = useState<number | null>(
+        initialData.offlineGain > 0 ? initialData.offlineGain : null,
+    );
     const isFirstSave = useRef(true);
     const baseStrikeGain = 1;
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
@@ -165,6 +173,22 @@ function App() {
                 <h2>
                     {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
                 </h2>
+
+                {offlineGainMessage !== null && (
+                    <div className="forge-offline-message">
+                        <p>
+                            Pendant votre absence, la Forge a produit +
+                            {offlineGainMessage.toFixed(2)} Échos.
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={() => setOfflineGainMessage(null)}
+                        >
+                            Fermer
+                        </button>
+                    </div>
+                )}
 
                 {showStrikeGain && (
                     <span className="strike-gain">
