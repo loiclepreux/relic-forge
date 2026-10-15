@@ -62,6 +62,7 @@ function App() {
         100,
         (forge.echoes / forgeUpgradeCost) * 100,
     );
+    const canUpgradeForge = forge.echoes >= forgeUpgradeCost;
     const passiveProduction = calculatePassiveProduction(forge.forgeForce);
     const displayedEchoes = forge.echoes.toFixed(2);
     const displayedStrikeGain = strikeGain.toFixed(2);
@@ -222,8 +223,9 @@ function App() {
 
                 <button
                     type="button"
+                    className={canUpgradeForge ? "forge-upgrade-ready" : ""}
                     onClick={handleUpgrade}
-                    disabled={forge.echoes < forgeUpgradeCost}
+                    disabled={!canUpgradeForge}
                 >
                     Améliorer la Forge — {forgeUpgradeCost} Échos
                 </button>

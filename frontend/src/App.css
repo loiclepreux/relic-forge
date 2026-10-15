@@ -431,3 +431,21 @@
     background: linear-gradient(90deg, #8f4d20, #d9943b, #ffd27a);
     border-radius: 8px;
 }
+
+.forge-upgrade-ready {
+    border: 1px solid #ffcc66;
+    box-shadow: 0 0 12px rgba(255, 170, 50, 0.5);
+
+    animation: forge-upgrade-glow 2s ease-in-out infinite;
+}
+
+@keyframes forge-upgrade-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgba(255, 170, 50, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 22px rgba(255, 190, 70, 0.8);
+    }
+}
