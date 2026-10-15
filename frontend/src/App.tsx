@@ -49,6 +49,7 @@ function App() {
     const [forge, setForge] = useState(initialData.forge);
     const [isStriking, setIsStriking] = useState(false);
     const [showStrikeGain, setShowStrikeGain] = useState(false);
+    const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
     const [offlineGainMessage, setOfflineGainMessage] = useState<number | null>(
@@ -119,7 +120,17 @@ function App() {
     }
 
     function handleUpgrade() {
+        if (!canUpgradeForge) {
+            return;
+        }
+
         setForge((currentForge) => upgradeForge(currentForge));
+
+        setShowUpgradeFeedback(true);
+
+        window.setTimeout(() => {
+            setShowUpgradeFeedback(false);
+        }, 1000);
     }
 
     function handleReset() {
@@ -211,6 +222,12 @@ function App() {
                     <span className="strike-gain">
                         +{displayedStrikeGain} Écho
                     </span>
+                )}
+
+                {showUpgradeFeedback && (
+                    <p className="forge-upgrade-feedback">
+                        ⚒️ Forge améliorée ! Force +1
+                    </p>
                 )}
 
                 <button

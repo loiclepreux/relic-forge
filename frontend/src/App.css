@@ -449,3 +449,38 @@
         box-shadow: 0 0 22px rgba(255, 190, 70, 0.8);
     }
 }
+
+.forge-upgrade-feedback {
+    margin: 12px 0;
+
+    color: #ffd27a;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+
+    text-shadow: 0 0 12px rgba(255, 170, 50, 0.6);
+
+    animation: forge-upgrade-feedback-animation 1s ease-out forwards;
+}
+
+@keyframes forge-upgrade-feedback-animation {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.9);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translateY(0) scale(1.08);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-15px) scale(1);
+    }
+}
