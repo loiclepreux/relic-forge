@@ -2,18 +2,24 @@ import {
     calculateStrikeGain,
     normalizeEchoes,
     calculateForgeUpgradeCost,
+    calculateCriticalStrikeGain,
 } from "./forgeEconomy";
 import type { ForgeState } from "./forgeState";
 
 export function strikeForge(
     forge: ForgeState,
     baseStrikeGain: number,
+    critical: boolean = false,
 ): ForgeState {
     const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
 
+    const finalStrikeGain = critical
+        ? calculateCriticalStrikeGain(strikeGain)
+        : strikeGain;
+
     return {
         ...forge,
-        echoes: normalizeEchoes(forge.echoes + strikeGain),
+        echoes: normalizeEchoes(forge.echoes + finalStrikeGain),
     };
 }
 

@@ -7,6 +7,7 @@ import {
     normalizeEchoes,
     getForgeStage,
     getForgeStageName,
+    isCriticalStrike,
 } from "./game/forgeEconomy";
 import { initialForgeState } from "./game/forgeState";
 import {
@@ -49,6 +50,8 @@ function App() {
     const [forge, setForge] = useState(initialData.forge);
     const [isStriking, setIsStriking] = useState(false);
     const [showStrikeGain, setShowStrikeGain] = useState(false);
+    const [showCriticalStrike, setShowCriticalStrike] = useState(false);
+    const [lastStrikeGain, setLastStrikeGain] = useState(0);
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
@@ -108,7 +111,25 @@ function App() {
             );
         }, 350);
 
-        setForge((currentForge) => strikeForge(currentForge, baseStrikeGain));
+        const critical = isCriticalStrike();
+
+        setShowCriticalStrike(critical);
+
+        if (critical) {
+            window.setTimeout(() => {
+                setShowCriticalStrike(false);
+            }, 600);
+        }
+
+        const actualStrikeGain = critical
+            ? Math.round(strikeGain * 2 * 100) / 100
+            : strikeGain;
+
+        setLastStrikeGain(actualStrikeGain);
+
+        setForge((currentForge) =>
+            strikeForge(currentForge, baseStrikeGain, critical),
+        );
 
         window.setTimeout(() => {
             setIsStriking(false);
@@ -157,99 +178,121 @@ function App() {
                     isStriking ? "forge-striking" : ""
                 }`}
             >
-                <p className="forge-label">{forgeStageName.toUpperCase()}</p>
+                <div className="forge-stats-panel">
+                    <h2>⚒️ Caractéristiques</h2>
 
-                <p>Force de Forge : {forge.forgeForce}</p>
-                <p>Stade de Forge : {forgeStage}</p>
-                <p>État de la Forge : {forgeStageName}</p>
+                    <p className="forge-label">
+                        {forgeStageName.toUpperCase()}
+                    </p>
 
-                <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
-                <p>
-                    Production passive : {passiveProduction.toFixed(2)} Écho/s
-                </p>
+                    <p>Force de Forge : {forge.forgeForce}</p>
+                    <p>Stade de Forge : {forgeStage}</p>
+                    <p>État de la Forge : {forgeStageName}</p>
 
-                <button
-                    type="button"
-                    className={`forge-core forge-core-stage-${forgeStage} ${
-                        isStriking ? "forge-core-striking" : ""
-                    }`}
-                    onClick={handleStrike}
-                    aria-label="Frapper la Forge"
-                >
-                    {impactRings.map((ringId) => (
-                        <span
-                            key={ringId}
-                            className={`forge-impact-ring forge-impact-ring-active forge-impact-ring-stage-${forgeStage}`}
-                            aria-hidden="true"
-                        />
-                    ))}
-                    <span className="forge-core-symbol">✦</span>
-                </button>
-
-                <h2>
-                    {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
-                </h2>
-
-                <div className="forge-upgrade-progress">
-                    <p>Progression vers la prochaine amélioration</p>
-
-                    <progress
-                        value={upgradeProgress}
-                        max={100}
-                        aria-label="Progression vers la prochaine amélioration"
-                    />
-
-                    <p>{upgradeProgress.toFixed(0)} %</p>
+                    <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
+                    <p>
+                        Production passive : {passiveProduction.toFixed(2)}{" "}
+                        Écho/s
+                    </p>
                 </div>
 
-                {offlineGainMessage !== null && (
-                    <div className="forge-offline-message">
-                        <p>
-                            Pendant votre absence, la Forge a produit +
-                            {offlineGainMessage.toFixed(2)} Échos.
+                <div className="forge-center-panel">
+                    <button
+                        type="button"
+                        className={`forge-core forge-core-stage-${forgeStage} ${
+                            isStriking ? "forge-core-striking" : ""
+                        }`}
+                        onClick={handleStrike}
+                        aria-label="Frapper la Forge"
+                    >
+                        {impactRings.map((ringId) => (
+                            <span
+                                key={ringId}
+                                className={`forge-impact-ring forge-impact-ring-active forge-impact-ring-stage-${forgeStage}`}
+                                aria-hidden="true"
+                            />
+                        ))}
+                        <span className="forge-core-symbol">✦</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`forge-button forge-button-stage-${forgeStage}`}
+                        onClick={handleStrike}
+                    >
+                        Frapper
+                    </button>
+
+                    <h2>
+                        {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
+                    </h2>
+
+                    {offlineGainMessage !== null && (
+                        <div className="forge-offline-message">
+                            <p>
+                                Pendant votre absence, la Forge a produit +
+                                {offlineGainMessage.toFixed(2)} Échos.
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={() => setOfflineGainMessage(null)}
+                            >
+                                Fermer
+                            </button>
+                        </div>
+                    )}
+
+                    {showStrikeGain && !showCriticalStrike && (
+                        <span className="strike-gain">
+                            +{lastStrikeGain.toFixed(2)} Échos
+                        </span>
+                    )}
+
+                    {showCriticalStrike && (
+                        <p className="forge-critical-feedback">
+                            ⚡ COUP CRITIQUE !
+                            <span className="forge-critical-gain">
+                                +{lastStrikeGain.toFixed(2)} Échos
+                            </span>
                         </p>
+                    )}
 
-                        <button
-                            type="button"
-                            onClick={() => setOfflineGainMessage(null)}
-                        >
-                            Fermer
-                        </button>
+                    {showUpgradeFeedback && (
+                        <p className="forge-upgrade-feedback">
+                            ⚒️ Forge améliorée ! Force +1
+                        </p>
+                    )}
+                </div>
+
+                <div className="forge-upgrades-panel">
+                    <h2>🔥 Améliorations</h2>
+
+                    <div className="forge-upgrade-progress">
+                        <p>Progression vers la prochaine amélioration</p>
+
+                        <progress
+                            value={upgradeProgress}
+                            max={100}
+                            aria-label="Progression vers la prochaine amélioration"
+                        />
+
+                        <p>{upgradeProgress.toFixed(0)} %</p>
                     </div>
-                )}
 
-                {showStrikeGain && (
-                    <span className="strike-gain">
-                        +{displayedStrikeGain} Écho
-                    </span>
-                )}
+                    <button
+                        type="button"
+                        className={canUpgradeForge ? "forge-upgrade-ready" : ""}
+                        onClick={handleUpgrade}
+                        disabled={!canUpgradeForge}
+                    >
+                        Améliorer la Forge — {forgeUpgradeCost} Échos
+                    </button>
 
-                {showUpgradeFeedback && (
-                    <p className="forge-upgrade-feedback">
-                        ⚒️ Forge améliorée ! Force +1
-                    </p>
-                )}
-
-                <button
-                    type="button"
-                    className={`forge-button forge-button-stage-${forgeStage}`}
-                    onClick={handleStrike}
-                >
-                    Frapper
-                </button>
-
-                <button
-                    type="button"
-                    className={canUpgradeForge ? "forge-upgrade-ready" : ""}
-                    onClick={handleUpgrade}
-                    disabled={!canUpgradeForge}
-                >
-                    Améliorer la Forge — {forgeUpgradeCost} Échos
-                </button>
-
-                <button type="button" onClick={handleReset}>
-                    Reset Forge (DEV)
-                </button>
+                    <button type="button" onClick={handleReset}>
+                        Reset Forge (DEV)
+                    </button>
+                </div>
             </section>
         </main>
     );

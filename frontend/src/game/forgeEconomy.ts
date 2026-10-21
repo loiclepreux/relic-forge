@@ -60,3 +60,14 @@ export function getForgeStageName(forgeStage: number): string {
             return "Forge Éteinte";
     }
 }
+
+export function isCriticalStrike(chance: number = 0.1): boolean {
+    return Math.random() < chance;
+}
+
+export function calculateCriticalStrikeGain(
+    strikeGain: number,
+    multiplier: number = 2,
+): number {
+    return normalizeEchoes(strikeGain * multiplier);
+}
