@@ -420,6 +420,9 @@
     max-width: 360px;
     margin: 20px auto;
     text-align: center;
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.7),
+        0 0 12px rgba(255, 170, 60, 0.18);
 }
 
 .forge-upgrade-progress p {
@@ -661,4 +664,466 @@
     text-shadow:
         0 0 12px rgba(255, 200, 80, 0.9),
         0 0 25px rgba(255, 100, 20, 0.6);
+}
+
+/* ========== EN-TÊTE DARK FANTASY ========== */
+
+.forge-header {
+    padding: 28px 24px;
+    margin-bottom: 24px;
+
+    text-align: center;
+
+    background: linear-gradient(
+        180deg,
+        rgba(45, 30, 20, 0.95),
+        rgba(15, 12, 15, 0.98)
+    );
+
+    border-bottom: 2px solid #8f6335;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.forge-header h1 {
+    margin: 0;
+
+    color: #e8c58a;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+
+    text-shadow:
+        0 0 12px rgba(255, 180, 70, 0.3),
+        0 3px 5px rgba(0, 0, 0, 0.8);
+}
+
+.forge-header p {
+    margin: 12px 0 0;
+
+    color: #bba88c;
+    font-size: 0.95rem;
+    font-style: italic;
+    letter-spacing: 1.5px;
+}
+
+/* ========== AMBIANCE DU PANNEAU CENTRAL ========== */
+
+.forge-center-panel {
+    position: relative;
+
+    background: radial-gradient(
+        ellipse at center,
+        rgba(130, 65, 25, 0.16) 0%,
+        rgba(45, 25, 20, 0.08) 45%,
+        transparent 75%
+    );
+
+    border-radius: 16px;
+}
+
+/* ========== ANNEAU MÉTALLIQUE DU NOYAU ========== */
+
+.forge-core::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+
+    border: 2px solid rgba(210, 160, 90, 0.45);
+    border-radius: 50%;
+
+    box-shadow:
+        inset 0 0 12px rgba(0, 0, 0, 0.65),
+        0 0 10px rgba(255, 160, 60, 0.12);
+
+    pointer-events: none;
+}
+
+/* ========== GRAVURES RUNIQUES DU NOYAU ========== */
+
+.forge-core::after {
+    content: "";
+    position: absolute;
+    inset: 24px;
+
+    border: 1px dashed rgba(220, 170, 100, 0.35);
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 8px rgba(255, 150, 50, 0.1),
+        inset 0 0 8px rgba(255, 150, 50, 0.08);
+
+    pointer-events: none;
+}
+
+/* ========== ROTATION DES GRAVURES RUNIQUES ========== */
+
+.forge-core::after {
+    animation: forge-runes-rotation 30s linear infinite;
+}
+
+@keyframes forge-runes-rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== PULSATION DU SYMBOLE MAGIQUE ========== */
+
+.forge-core-symbol {
+    position: relative;
+    z-index: 1;
+
+    animation: forge-symbol-glow 3s ease-in-out infinite;
+}
+
+@keyframes forge-symbol-glow {
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+/* ========== ORNEMENTS DES PANNEAUX RPG ========== */
+
+.forge-stats-panel,
+.forge-upgrades-panel {
+    outline: 1px solid rgba(220, 170, 100, 0.15);
+    outline-offset: -8px;
+}
+
+/* ========== TITRES DES PANNEAUX RPG ========== */
+
+.forge-stats-panel h2,
+.forge-upgrades-panel h2 {
+    width: 100%;
+    padding-bottom: 16px;
+
+    border-bottom: 1px solid rgba(220, 170, 100, 0.3);
+
+    text-shadow: 0 0 10px rgba(255, 180, 70, 0.15);
+}
+
+/* ========== LIGNES DES CARACTÉRISTIQUES ========== */
+
+.forge-stats-panel p:not(.forge-label) {
+    padding: 12px 8px;
+    margin: 0;
+
+    color: #d6c4aa;
+    font-size: 0.95rem;
+
+    border-bottom: 1px solid rgba(180, 130, 80, 0.12);
+}
+
+/* ========== SURVOL DES CARACTÉRISTIQUES ========== */
+
+.forge-stats-panel p:not(.forge-label) {
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.forge-stats-panel p:not(.forge-label):hover {
+    background-color: rgba(180, 110, 45, 0.12);
+    color: #ffd89a;
+}
+
+/* ========== PLAQUE DU STADE DE FORGE ========== */
+
+.forge-stats-panel .forge-label {
+    display: inline-block;
+
+    padding: 10px 22px;
+    margin: 12px 0 20px;
+
+    color: #ffd27a;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(100, 60, 25, 0.35),
+        rgba(30, 20, 15, 0.9)
+    );
+
+    border: 1px solid rgba(220, 170, 100, 0.5);
+    border-radius: 6px;
+
+    box-shadow:
+        inset 0 0 12px rgba(255, 170, 60, 0.08),
+        0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ========== BOUTON D'AMÉLIORATION RPG ========== */
+
+.forge-upgrades-panel > button:first-of-type {
+    background: linear-gradient(180deg, #69401f 0%, #382416 100%);
+
+    border: 1px solid #a7773e;
+    color: #ffe0a3;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 220, 150, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ========== SURVOL DU BOUTON D'AMÉLIORATION ========== */
+
+.forge-upgrades-panel > button:first-of-type:hover:not(:disabled) {
+    background: linear-gradient(180deg, #865329 0%, #4b2e1b 100%);
+
+    border-color: #e2a75b;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 220, 150, 0.3),
+        0 0 18px rgba(255, 160, 60, 0.3),
+        0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+/* ========== BOUTON FRAPPER : STYLE RPG ========== */
+
+.forge-button {
+    border-width: 2px;
+    border-style: solid;
+
+    border-radius: 8px;
+
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -4px 0 rgba(0, 0, 0, 0.3),
+        0 6px 18px rgba(0, 0, 0, 0.45);
+
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ========== EFFET DE PRESSION DU BOUTON FRAPPER ========== */
+
+.forge-button:active {
+    transform: translateY(3px) scale(0.98);
+
+    box-shadow:
+        inset 0 3px 8px rgba(0, 0, 0, 0.55),
+        0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+/* ========== LUEUR AU SURVOL DU NOYAU ========== */
+
+.forge-core:hover {
+    border-color: #d6a35e;
+
+    box-shadow:
+        0 0 20px rgba(255, 170, 70, 0.3),
+        0 0 45px rgba(255, 110, 30, 0.15),
+        inset 0 0 25px rgba(255, 160, 60, 0.12);
+}
+
+/* ========== LUEUR DU NOYAU SELON LE STADE ========== */
+
+.forge-core-stage-1:hover {
+    border-color: #a1a1aa;
+    box-shadow:
+        0 0 20px rgba(161, 161, 170, 0.3),
+        0 0 45px rgba(113, 113, 122, 0.15);
+}
+
+.forge-core-stage-2:hover {
+    border-color: #fbbf24;
+    box-shadow:
+        0 0 20px rgba(251, 191, 36, 0.4),
+        0 0 45px rgba(217, 119, 6, 0.2);
+}
+
+.forge-core-stage-3:hover {
+    border-color: #fb923c;
+    box-shadow:
+        0 0 25px rgba(249, 115, 22, 0.5),
+        0 0 50px rgba(234, 88, 12, 0.25);
+}
+
+.forge-core-stage-4:hover {
+    border-color: #f87171;
+    box-shadow:
+        0 0 30px rgba(239, 68, 68, 0.6),
+        0 0 60px rgba(220, 38, 38, 0.3);
+}
+
+/* ========== FOND DARK FANTASY ========== */
+
+.forge-page {
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 45%,
+            rgba(110, 55, 25, 0.12),
+            transparent 65%
+        ),
+        repeating-linear-gradient(
+            135deg,
+            transparent 0,
+            transparent 48px,
+            rgba(255, 255, 255, 0.012) 49px,
+            transparent 50px
+        ),
+        #0b0b0d;
+}
+
+/* ========== HALO DE BRAISES CENTRAL ========== */
+
+.forge-center-panel {
+    background: radial-gradient(
+        circle at 50% 42%,
+        rgba(255, 120, 35, 0.13) 0%,
+        rgba(130, 55, 20, 0.07) 35%,
+        transparent 70%
+    );
+}
+
+/* ========== RESPIRATION DES BRAISES ========== */
+
+.forge-center-panel {
+    animation: forge-embers-breath 5s ease-in-out infinite;
+}
+
+@keyframes forge-embers-breath {
+    0%,
+    100% {
+        background-size: 100% 100%;
+    }
+
+    50% {
+        background-size: 115% 115%;
+    }
+}
+
+/* ========== BRAISES DU PANNEAU AMÉLIORATIONS ========== */
+
+.forge-upgrades-panel {
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(180, 85, 25, 0.16),
+            transparent 60%
+        ),
+        linear-gradient(145deg, rgba(35, 25, 20, 0.95), rgba(15, 12, 15, 0.98));
+}
+
+/* ========== PIERRE ANCIENNE : CARACTÉRISTIQUES ========== */
+
+.forge-stats-panel {
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(100, 110, 130, 0.12),
+            transparent 60%
+        ),
+        linear-gradient(145deg, rgba(30, 30, 38, 0.95), rgba(12, 12, 18, 0.98));
+}
+
+/* ========== BORDURES LUMINEUSES RPG ========== */
+
+.forge-stats-panel {
+    border-color: rgba(140, 155, 180, 0.35);
+}
+
+.forge-upgrades-panel {
+    border-color: rgba(220, 145, 65, 0.45);
+}
+
+/* ========== TRANSITIONS DES PANNEAUX RPG ========== */
+
+.forge-stats-panel,
+.forge-upgrades-panel {
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+/* ========== SURVOL DES PANNEAUX RPG ========== */
+
+.forge-stats-panel:hover {
+    border-color: rgba(170, 190, 220, 0.65);
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.4),
+        0 0 22px rgba(120, 150, 190, 0.15);
+}
+
+.forge-upgrades-panel:hover {
+    border-color: rgba(255, 180, 85, 0.7);
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.4),
+        0 0 22px rgba(255, 140, 45, 0.18);
+}
+
+/* ========== ORNEMENTS DES TITRES RPG ========== */
+
+.forge-stats-panel h2::before,
+.forge-upgrades-panel h2::before {
+    content: "◆";
+    margin-right: 12px;
+
+    color: #b88a50;
+    font-size: 0.65rem;
+    vertical-align: middle;
+}
+
+.forge-stats-panel h2::after,
+.forge-upgrades-panel h2::after {
+    content: "◆";
+    margin-left: 12px;
+
+    color: #b88a50;
+    font-size: 0.65rem;
+    vertical-align: middle;
+}
+
+/* ========== ORNEMENT DU TITRE PRINCIPAL ========== */
+
+.forge-header h1::after {
+    content: "";
+    display: block;
+
+    width: 180px;
+    height: 2px;
+    margin: 16px auto 0;
+
+    background: linear-gradient(90deg, transparent, #d6a35e, transparent);
+
+    box-shadow: 0 0 12px rgba(255, 180, 70, 0.25);
+}
+
+/* ========== LUEUR DU TITRE RELIC FORGE ========== */
+
+.forge-header h1 {
+    animation: forge-title-glow 5s ease-in-out infinite;
+}
+
+@keyframes forge-title-glow {
+    0%,
+    100% {
+        text-shadow:
+            0 0 10px rgba(255, 180, 70, 0.2),
+            0 3px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    50% {
+        text-shadow:
+            0 0 20px rgba(255, 180, 70, 0.5),
+            0 0 35px rgba(255, 120, 30, 0.2),
+            0 3px 5px rgba(0, 0, 0, 0.8);
+    }
 }
