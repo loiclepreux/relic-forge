@@ -9,11 +9,7 @@ import {
     getForgeStageName,
 } from "./game/forgeEconomy";
 import { createInitialForgeStateV2 } from "./game/forgeState";
-import {
-    loadForgeStateV2Safe,
-    canAutoSaveForgeV2,
-    saveForgeStateV2,
-} from "./game/forgeSave";
+import { loadForgeState, canAutoSave, saveForgeState } from "./game/forgeSave";
 import type { StrikeWindow } from "./game/forgeActions";
 import {
     strikeForgeWithProductionV2,
@@ -24,8 +20,8 @@ import {
 import "./App.css";
 
 function loadInitialForgeV2() {
-    const result = loadForgeStateV2Safe();
-    const autoSaveAllowed = canAutoSaveForgeV2(result.status);
+    const result = loadForgeState();
+    const autoSaveAllowed = canAutoSave(result.status);
 
     if (result.status === "loaded") {
         const loadedForge = result.data.forge;
@@ -139,7 +135,7 @@ function App() {
     useEffect(() => {
         if (!initialData.autoSaveAllowed || blocked) return;
         const interval = window.setInterval(() => {
-            saveForgeStateV2(forgeRef.current);
+            saveForgeState(forgeRef.current);
         }, 5000);
         return () => window.clearInterval(interval);
     }, [initialData.autoSaveAllowed, blocked]);
@@ -147,7 +143,7 @@ function App() {
     useEffect(() => {
         if (!initialData.autoSaveAllowed || blocked) return;
         const save = () => {
-            saveForgeStateV2(forgeRef.current);
+            saveForgeState(forgeRef.current);
         };
         const onVisibilityChange = () => {
             if (document.visibilityState === "hidden") save();

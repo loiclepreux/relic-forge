@@ -14,17 +14,12 @@ type ForgeSaveV2 = {
     savedAt: number;
 };
 
-export type LoadedForgeSave = {
-    forge: ForgeState;
-    savedAt: number;
-};
-
 export type LoadedForgeSaveV2 = {
     forge: ForgeStateV2;
     savedAt: number;
 };
 
-export type ForgeLoadResultV2 =
+export type ForgeLoadResult =
     | {
           status: "loaded";
           data: LoadedForgeSaveV2;
@@ -36,9 +31,7 @@ export type ForgeLoadResultV2 =
           status: "error";
       };
 
-export function canAutoSaveForgeV2(
-    loadStatus: ForgeLoadResultV2["status"],
-): boolean {
+export function canAutoSave(loadStatus: ForgeLoadResult["status"]): boolean {
     return loadStatus === "loaded" || loadStatus === "missing";
 }
 
@@ -135,7 +128,7 @@ function isForgeSave(value: unknown): value is ForgeSave {
     );
 }
 
-export function saveForgeStateV2(
+export function saveForgeState(
     forge: ForgeStateV2,
     storage: Pick<Storage, "setItem"> = localStorage,
 ): void {
@@ -158,112 +151,9 @@ export function saveForgeStateV2(
     }
 }
 
-export function saveForgeState(forge: ForgeState): void {
-    const save: ForgeSave = {
-        forge,
-        savedAt: Date.now(),
-    };
-
-    localStorage.setItem(FORGE_SAVE_KEY, JSON.stringify(save));
-}
-
-export function loadForgeState(): LoadedForgeSave | null {
-    const savedForge = localStorage.getItem(FORGE_SAVE_KEY);
-
-    if (savedForge === null) {
-        return null;
-    }
-
-    try {
-        const parsedSave: unknown = JSON.parse(savedForge);
-
-        if (!isForgeSave(parsedSave)) {
-            return null;
-        }
-
-        return {
-            forge: parsedSave.forge,
-            savedAt: parsedSave.savedAt,
-        };
-    } catch {
-        return null;
-    }
-}
-
-const MAX_OFFLINE_SECONDS = 8 * 60 * 60;
-
-export function calculateOfflineSeconds(savedAt: number): number {
-    const elapsedMilliseconds = Date.now() - savedAt;
-    const elapsedSeconds = Math.max(0, elapsedMilliseconds / 1000);
-
-    return Math.min(elapsedSeconds, MAX_OFFLINE_SECONDS);
-}
-
-export function loadForgeStateV2(
+export function loadForgeState(
     storage: Pick<Storage, "getItem"> = localStorage,
-): LoadedForgeSaveV2 | null {
-    try {
-        // 1. Rechercher d'abord une sauvegarde V2.
-        const savedForgeV2 = storage.getItem(FORGE_SAVE_KEY_V2);
-
-        if (savedForgeV2 !== null) {
-            const parsedV2: unknown = JSON.parse(savedForgeV2);
-
-            if (isForgeSaveV2(parsedV2)) {
-                return {
-                    forge: parsedV2.forge,
-                    savedAt: parsedV2.savedAt,
-                };
-            }
-
-            // Une V2 présente mais invalide ne doit pas
-            // provoquer une migration automatique.
-            console.error("Sauvegarde V2 invalide : chargement refusé.");
-            return null;
-        }
-
-        // 2. Aucune sauvegarde V2 : rechercher la V1.
-        const savedForgeV1 = storage.getItem(FORGE_SAVE_KEY);
-
-        if (savedForgeV1 === null) {
-            return null;
-        }
-
-        const parsedV1: unknown = JSON.parse(savedForgeV1);
-
-        if (!isForgeSave(parsedV1)) {
-            console.error("Sauvegarde V1 invalide : migration refusée.");
-            return null;
-        }
-
-        // 3. Convertir la V1 en mémoire.
-        const migratedForge = migrateForgeStateV1ToV2(
-            parsedV1.forge,
-            parsedV1.savedAt,
-        );
-
-        // 4. Vérifier l'état obtenu.
-        if (!isForgeStateV2(migratedForge)) {
-            console.error(
-                "Migration V1 vers V2 refusée : état converti invalide.",
-            );
-            return null;
-        }
-
-        return {
-            forge: migratedForge,
-            savedAt: parsedV1.savedAt,
-        };
-    } catch (error) {
-        console.error("Impossible de charger la sauvegarde V2 :", error);
-
-        return null;
-    }
-}
-
-export function loadForgeStateV2Safe(
-    storage: Pick<Storage, "getItem"> = localStorage,
-): ForgeLoadResultV2 {
+): ForgeLoadResult {
     try {
         const savedForgeV2 = storage.getItem(FORGE_SAVE_KEY_V2);
 
