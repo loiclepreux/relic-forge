@@ -4,7 +4,7 @@ import {
     calculateProducerProduction,
     calculateAwakenedEmberCostMilli,
     calculateStrikeGainMilli,
-    calculateOfflineGainMilliV2,
+    calculateOfflineGainMilli,
     getForgeStage,
     getForgeStageName,
 } from "./game/forgeEconomy";
@@ -14,13 +14,13 @@ import {
     canAutoSaveForgeV2,
     saveForgeStateV2,
 } from "./game/forgeSave";
-import type { StrikeWindow } from "./game/forgeActionsV2";
+import type { StrikeWindow } from "./game/forgeActions";
 import {
     strikeForgeWithProductionV2,
     upgradeForgeWithProductionV2,
     buyAwakenedEmberWithProductionV2,
     accrueProductionV2,
-} from "./game/forgeActionsV2";
+} from "./game/forgeActions";
 import "./App.css";
 
 function loadInitialForgeV2() {
@@ -40,7 +40,7 @@ function loadInitialForgeV2() {
         }
         const elapsed = Math.max(0, now - loadedForge.lastProductionAt);
         const production = calculateProducerProduction(loadedForge.producers);
-        const gain = calculateOfflineGainMilliV2(production, elapsed);
+        const gain = calculateOfflineGainMilli(production, elapsed);
         if (
             !Number.isSafeInteger(gain) ||
             gain < 0 ||

@@ -38,49 +38,12 @@ export function calculateProducerProduction(producers: ForgeProducers): number {
     return producers.awakenedEmber * awakenedEmberProduction;
 }
 
-export function calculateElapsedProductionMilli(
-    passiveProduction: number,
-    elapsedMilliseconds: number,
-): number {
-    const safeElapsedMilliseconds = Math.max(0, elapsedMilliseconds);
-
-    return Math.floor(passiveProduction * safeElapsedMilliseconds);
-}
-
-export function calculateOfflineGainMilli(
-    passiveProduction: number,
-    offlineSeconds: number,
-): number {
-    const MAX_OFFLINE_SECONDS = 8 * 60 * 60;
-    const OFFLINE_EFFICIENCY = 0.5;
-
-    const safeOfflineSeconds = Math.min(
-        Math.max(0, offlineSeconds),
-        MAX_OFFLINE_SECONDS,
-    );
-
-    return Math.floor(
-        passiveProduction * safeOfflineSeconds * OFFLINE_EFFICIENCY * 1000,
-    );
-}
-
 export function calculateForgeUpgradeCost(forgeForce: number): number {
     return Math.ceil(25 * 1.18 ** forgeForce);
 }
 
 export function calculateForgeUpgradeCostMilli(forgeForce: number): number {
     return calculateForgeUpgradeCost(forgeForce) * 1000;
-}
-
-export function calculateStrikeGain(
-    baseStrikeGain: number,
-    forgeForce: number,
-): number {
-    return baseStrikeGain * (1 + 0.15 * forgeForce);
-}
-
-export function calculatePassiveProduction(forgeForce: number): number {
-    return forgeForce * 0.1;
 }
 
 export function calculateAwakenedEmberCostMilli(owned: number): number {
@@ -90,19 +53,6 @@ export function calculateAwakenedEmberCostMilli(owned: number): number {
     const costEchoes = Math.ceil(baseCost * growthRate ** owned);
 
     return costEchoes * 1000;
-}
-
-export function calculateOfflineGain(
-    passiveProduction: number,
-    offlineSeconds: number,
-): number {
-    const offlineEfficiency = 0.5;
-
-    return passiveProduction * offlineSeconds * offlineEfficiency;
-}
-
-export function normalizeEchoes(value: number): number {
-    return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 export function getForgeStage(forgeForce: number): number {
@@ -138,17 +88,6 @@ export function getForgeStageName(forgeStage: number): string {
         default:
             return "Endormie";
     }
-}
-
-export function isCriticalStrike(chance: number = 0.1): boolean {
-    return Math.random() < chance;
-}
-
-export function calculateCriticalStrikeGain(
-    strikeGain: number,
-    multiplier: number = 2,
-): number {
-    return normalizeEchoes(strikeGain * multiplier);
 }
 
 export function calculateElapsedProductionWithRemainder(
@@ -198,7 +137,7 @@ export function calculateElapsedProductionWithRemainder(
     };
 }
 
-export function calculateOfflineGainMilliV2(
+export function calculateOfflineGainMilli(
     passiveProduction: number,
     offlineMilliseconds: number,
 ): number {
