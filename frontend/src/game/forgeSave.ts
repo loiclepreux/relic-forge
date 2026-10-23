@@ -158,9 +158,9 @@ export function loadForgeState(
         const savedForge = storage.getItem(SAVE_KEY);
 
         if (savedForge !== null) {
-            const parsedV2: unknown = JSON.parse(savedForge);
+            const parsed: unknown = JSON.parse(savedForge);
 
-            if (!isForgeSave(parsedV2)) {
+            if (!isForgeSave(parsed)) {
                 console.error("Sauvegarde V2 invalide.");
                 return { status: "error" };
             }
@@ -168,8 +168,8 @@ export function loadForgeState(
             return {
                 status: "loaded",
                 data: {
-                    forge: parsedV2.forge,
-                    savedAt: parsedV2.savedAt,
+                    forge: parsed.forge,
+                    savedAt: parsed.savedAt,
                 },
             };
         }
