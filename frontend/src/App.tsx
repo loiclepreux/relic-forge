@@ -1,169 +1,214 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-    calculateForgeUpgradeCost,
-    calculateStrikeGain,
-    calculatePassiveProduction,
-    calculateOfflineGain,
-    normalizeEchoes,
+    calculateForgeUpgradeCostMilli,
+    calculateProducerProduction,
+    calculateAwakenedEmberCostMilli,
+    calculateStrikeGainMilli,
+    calculateOfflineGainMilliV2,
     getForgeStage,
     getForgeStageName,
-    isCriticalStrike,
 } from "./game/forgeEconomy";
-import { initialForgeState } from "./game/forgeState";
+import { createInitialForgeStateV2 } from "./game/forgeState";
 import {
-    loadForgeState,
-    saveForgeState,
-    calculateOfflineSeconds,
+    loadForgeStateV2Safe,
+    canAutoSaveForgeV2,
+    saveForgeStateV2,
 } from "./game/forgeSave";
-import { strikeForge, upgradeForge, resetForge } from "./game/forgeActions";
+import type { StrikeWindow } from "./game/forgeActionsV2";
+import {
+    strikeForgeWithProductionV2,
+    upgradeForgeWithProductionV2,
+    buyAwakenedEmberWithProductionV2,
+    accrueProductionV2,
+} from "./game/forgeActionsV2";
 import "./App.css";
 
-function loadInitialForge() {
-    const loadedSave = loadForgeState();
+function loadInitialForgeV2() {
+    const result = loadForgeStateV2Safe();
+    const autoSaveAllowed = canAutoSaveForgeV2(result.status);
 
-    if (loadedSave === null) {
+    if (result.status === "loaded") {
+        const loadedForge = result.data.forge;
+        const now = Date.now();
+        if (loadedForge.lastProductionAt > now) {
+            return {
+                forge: loadedForge,
+                autoSaveAllowed: false,
+                loadError: true,
+                offlineGainMilli: 0,
+            };
+        }
+        const elapsed = Math.max(0, now - loadedForge.lastProductionAt);
+        const production = calculateProducerProduction(loadedForge.producers);
+        const gain = calculateOfflineGainMilliV2(production, elapsed);
+        if (
+            !Number.isSafeInteger(gain) ||
+            gain < 0 ||
+            gain > Number.MAX_SAFE_INTEGER - loadedForge.echoesMilli
+        ) {
+            return {
+                forge: loadedForge,
+                autoSaveAllowed: false,
+                loadError: true,
+                offlineGainMilli: 0,
+            };
+        }
         return {
-            forge: initialForgeState,
-            offlineGain: 0,
+            forge: {
+                ...loadedForge,
+                echoesMilli: loadedForge.echoesMilli + gain,
+                productionRemainderMilli: 0,
+                lastProductionAt: now,
+            },
+            autoSaveAllowed,
+            loadError: false,
+            offlineGainMilli: gain,
         };
     }
 
-    const offlineSeconds = calculateOfflineSeconds(loadedSave.savedAt);
-
-    const offlineProduction = calculatePassiveProduction(
-        loadedSave.forge.forgeForce,
-    );
-
-    const offlineGain = calculateOfflineGain(offlineProduction, offlineSeconds);
-
     return {
-        forge: {
-            ...loadedSave.forge,
-            echoes: normalizeEchoes(loadedSave.forge.echoes + offlineGain),
-        },
-        offlineGain,
+        forge: createInitialForgeStateV2(),
+        autoSaveAllowed,
+        loadError: result.status !== "missing",
+        offlineGainMilli: 0,
     };
 }
 
+const formatEchoes = (milli: number) =>
+    (milli / 1000).toLocaleString("fr-FR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+    });
+
 function App() {
-    const [initialData] = useState(loadInitialForge);
+    const [initialData] = useState(loadInitialForgeV2);
     const [forge, setForge] = useState(initialData.forge);
+    const forgeRef = useRef(forge);
+    const strikeWindowRef = useRef<StrikeWindow>({ startedAt: 0, count: 0 });
     const [isStriking, setIsStriking] = useState(false);
     const [showStrikeGain, setShowStrikeGain] = useState(false);
-    const [showCriticalStrike, setShowCriticalStrike] = useState(false);
-    const [lastStrikeGain, setLastStrikeGain] = useState(0);
+    const [lastStrikeGainMilli, setLastStrikeGainMilli] = useState(0);
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
     const [offlineGainMessage, setOfflineGainMessage] = useState<number | null>(
-        initialData.offlineGain > 0 ? initialData.offlineGain : null,
+        initialData.offlineGainMilli > 0 ? initialData.offlineGainMilli : null,
     );
-    const isFirstSave = useRef(true);
-    const baseStrikeGain = 1;
-    const strikeGain = calculateStrikeGain(baseStrikeGain, forge.forgeForce);
-    const forgeUpgradeCost = calculateForgeUpgradeCost(forge.forgeForce);
-    const upgradeProgress = Math.min(
-        100,
-        (forge.echoes / forgeUpgradeCost) * 100,
+
+    const blocked = initialData.loadError;
+    const stage = getForgeStage(forge.forgeForce);
+    const stageName = getForgeStageName(stage);
+    const production = calculateProducerProduction(forge.producers);
+    const upgradeCost = calculateForgeUpgradeCostMilli(forge.forgeForce);
+    const emberCost = calculateAwakenedEmberCostMilli(
+        forge.producers.awakenedEmber,
     );
-    const canUpgradeForge = forge.echoes >= forgeUpgradeCost;
-    const passiveProduction = calculatePassiveProduction(forge.forgeForce);
-    const displayedEchoes = forge.echoes.toFixed(2);
-    const displayedStrikeGain = strikeGain.toFixed(2);
-    const forgeStage = getForgeStage(forge.forgeForce);
-    const forgeStageName = getForgeStageName(forgeStage);
+    const emberUnlocked = forge.forgeForce >= 2;
+    const canUpgrade =
+        !blocked &&
+        Number.isSafeInteger(upgradeCost) &&
+        upgradeCost >= 0 &&
+        forge.echoesMilli >= upgradeCost;
+    const canBuyEmber =
+        !blocked &&
+        emberUnlocked &&
+        Number.isSafeInteger(emberCost) &&
+        emberCost >= 0 &&
+        forge.echoesMilli >= emberCost;
+    const upgradeProgress =
+        Number.isSafeInteger(upgradeCost) && upgradeCost > 0
+            ? Math.min(100, (forge.echoesMilli / upgradeCost) * 100)
+            : 0;
+    const theoreticalStrikeGain = calculateStrikeGainMilli(
+        1,
+        forge.forgeForce,
+        production,
+        1,
+    );
 
     useEffect(() => {
-        if (isFirstSave.current) {
-            isFirstSave.current = false;
-            return;
-        }
-
-        saveForgeState(forge);
-    }, [forge]);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setForge((currentForge) => ({
-                ...currentForge,
-                echoes: normalizeEchoes(
-                    currentForge.echoes + passiveProduction,
-                ),
-            }));
+        if (blocked) return;
+        const interval = window.setInterval(() => {
+            const updated = accrueProductionV2(forgeRef.current, Date.now());
+            forgeRef.current = updated;
+            setForge(updated);
         }, 1000);
+        return () => window.clearInterval(interval);
+    }, [blocked]);
 
-        return () => {
-            clearInterval(interval);
+    useEffect(() => {
+        if (!initialData.autoSaveAllowed || blocked) return;
+        const interval = window.setInterval(() => {
+            saveForgeStateV2(forgeRef.current);
+        }, 5000);
+        return () => window.clearInterval(interval);
+    }, [initialData.autoSaveAllowed, blocked]);
+
+    useEffect(() => {
+        if (!initialData.autoSaveAllowed || blocked) return;
+        const save = () => {
+            saveForgeStateV2(forgeRef.current);
         };
-    }, [passiveProduction]);
+        const onVisibilityChange = () => {
+            if (document.visibilityState === "hidden") save();
+        };
+        window.addEventListener("pagehide", save);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        return () => {
+            window.removeEventListener("pagehide", save);
+            document.removeEventListener(
+                "visibilitychange",
+                onVisibilityChange,
+            );
+        };
+    }, [initialData.autoSaveAllowed, blocked]);
 
     function handleStrike() {
+        if (blocked) return;
+        const result = strikeForgeWithProductionV2(
+            forgeRef.current,
+            strikeWindowRef.current,
+            Date.now(),
+        );
+        strikeWindowRef.current = result.strikeWindow;
+        if (result.gainMilli <= 0) return;
+        forgeRef.current = result.forge;
+        setForge(result.forge);
+        setLastStrikeGainMilli(result.gainMilli);
         setIsStriking(true);
         setShowStrikeGain(true);
-
-        const newRingId = ++impactRingIdRef.current;
-
-        setImpactRings((currentRings) => [...currentRings, newRingId]);
-
-        window.setTimeout(() => {
-            setImpactRings((currentRings) =>
-                currentRings.filter((ringId) => ringId !== newRingId),
-            );
-        }, 350);
-
-        const critical = isCriticalStrike();
-
-        setShowCriticalStrike(critical);
-
-        if (critical) {
-            window.setTimeout(() => {
-                setShowCriticalStrike(false);
-            }, 600);
-        }
-
-        const actualStrikeGain = critical
-            ? Math.round(strikeGain * 2 * 100) / 100
-            : strikeGain;
-
-        setLastStrikeGain(actualStrikeGain);
-
-        setForge((currentForge) =>
-            strikeForge(currentForge, baseStrikeGain, critical),
+        const ringId = ++impactRingIdRef.current;
+        setImpactRings((rings) => [...rings, ringId]);
+        window.setTimeout(
+            () =>
+                setImpactRings((rings) => rings.filter((id) => id !== ringId)),
+            350,
         );
-
-        window.setTimeout(() => {
-            setIsStriking(false);
-        }, 120);
-
-        window.setTimeout(() => {
-            setShowStrikeGain(false);
-        }, 600);
+        window.setTimeout(() => setIsStriking(false), 120);
+        window.setTimeout(() => setShowStrikeGain(false), 600);
     }
 
     function handleUpgrade() {
-        if (!canUpgradeForge) {
-            return;
-        }
-
-        setForge((currentForge) => upgradeForge(currentForge));
-
+        if (!canUpgrade) return;
+        const updated = upgradeForgeWithProductionV2(
+            forgeRef.current,
+            Date.now(),
+        );
+        if (updated.forgeForce === forgeRef.current.forgeForce) return;
+        forgeRef.current = updated;
+        setForge(updated);
         setShowUpgradeFeedback(true);
-
-        window.setTimeout(() => {
-            setShowUpgradeFeedback(false);
-        }, 1000);
+        window.setTimeout(() => setShowUpgradeFeedback(false), 1000);
     }
 
-    function handleReset() {
-        const shouldReset = window.confirm(
-            "Réinitialiser complètement la Forge ? Cette action effacera la progression actuelle.",
+    function handleBuyEmber() {
+        if (!canBuyEmber) return;
+        const updated = buyAwakenedEmberWithProductionV2(
+            forgeRef.current,
+            Date.now(),
         );
-
-        if (!shouldReset) {
-            return;
-        }
-
-        setForge(resetForge());
+        forgeRef.current = updated;
+        setForge(updated);
     }
 
     return (
@@ -173,25 +218,31 @@ function App() {
                 <p>Chaque clic peut révéler une légende.</p>
             </header>
 
+            {blocked && (
+                <p role="alert" className="forge-offline-message">
+                    Impossible de charger la sauvegarde en toute sécurité. La
+                    Forge est bloquée pour éviter d'écraser ta progression.
+                </p>
+            )}
+
             <section
-                className={`forge forge-stage-${forgeStage} ${
-                    isStriking ? "forge-striking" : ""
-                }`}
+                className={`forge forge-stage-${stage} ${isStriking ? "forge-striking" : ""}`}
             >
                 <div className="forge-stats-panel">
                     <h2>⚒️ Caractéristiques</h2>
-
-                    <p className="forge-label">
-                        {forgeStageName.toUpperCase()}
-                    </p>
-
+                    <p className="forge-label">{stageName.toUpperCase()}</p>
                     <p>Force de Forge : {forge.forgeForce}</p>
-                    <p>Stade de Forge : {forgeStage}</p>
-                    <p>État de la Forge : {forgeStageName}</p>
-
-                    <p>Gain par frappe : +{displayedStrikeGain} Écho</p>
+                    <p>Stade de Forge : {stage}</p>
+                    <p>État de la Forge : {stageName}</p>
                     <p>
-                        Production passive : {passiveProduction.toFixed(2)}{" "}
+                        Gain par frappe : +{formatEchoes(theoreticalStrikeGain)}{" "}
+                        Écho(s)
+                    </p>
+                    <p>
+                        Production passive :{" "}
+                        {production.toLocaleString("fr-FR", {
+                            maximumFractionDigits: 3,
+                        })}{" "}
                         Écho/s
                     </p>
                 </div>
@@ -199,41 +250,36 @@ function App() {
                 <div className="forge-center-panel">
                     <button
                         type="button"
-                        className={`forge-core forge-core-stage-${forgeStage} ${
-                            isStriking ? "forge-core-striking" : ""
-                        }`}
+                        className={`forge-core forge-core-stage-${stage} ${isStriking ? "forge-core-striking" : ""}`}
                         onClick={handleStrike}
+                        disabled={blocked}
                         aria-label="Frapper la Forge"
                     >
-                        {impactRings.map((ringId) => (
+                        {impactRings.map((id) => (
                             <span
-                                key={ringId}
-                                className={`forge-impact-ring forge-impact-ring-active forge-impact-ring-stage-${forgeStage}`}
+                                key={id}
+                                className={`forge-impact-ring forge-impact-ring-active forge-impact-ring-stage-${stage}`}
                                 aria-hidden="true"
                             />
                         ))}
                         <span className="forge-core-symbol">✦</span>
                     </button>
-
                     <button
                         type="button"
-                        className={`forge-button forge-button-stage-${forgeStage}`}
+                        className={`forge-button forge-button-stage-${stage}`}
                         onClick={handleStrike}
+                        disabled={blocked}
                     >
                         Frapper
                     </button>
-
-                    <h2>
-                        {displayedEchoes} {forge.echoes > 1 ? "Échos" : "Écho"}
-                    </h2>
+                    <h2>{formatEchoes(forge.echoesMilli)} Échos</h2>
 
                     {offlineGainMessage !== null && (
                         <div className="forge-offline-message">
                             <p>
                                 Pendant votre absence, la Forge a produit +
-                                {offlineGainMessage.toFixed(2)} Échos.
+                                {formatEchoes(offlineGainMessage)} Échos.
                             </p>
-
                             <button
                                 type="button"
                                 onClick={() => setOfflineGainMessage(null)}
@@ -242,22 +288,11 @@ function App() {
                             </button>
                         </div>
                     )}
-
-                    {showStrikeGain && !showCriticalStrike && (
+                    {showStrikeGain && (
                         <span className="strike-gain">
-                            +{lastStrikeGain.toFixed(2)} Échos
+                            +{formatEchoes(lastStrikeGainMilli)} Échos
                         </span>
                     )}
-
-                    {showCriticalStrike && (
-                        <p className="forge-critical-feedback">
-                            ⚡ COUP CRITIQUE !
-                            <span className="forge-critical-gain">
-                                +{lastStrikeGain.toFixed(2)} Échos
-                            </span>
-                        </p>
-                    )}
-
                     {showUpgradeFeedback && (
                         <p className="forge-upgrade-feedback">
                             ⚒️ Forge améliorée ! Force +1
@@ -267,30 +302,47 @@ function App() {
 
                 <div className="forge-upgrades-panel">
                     <h2>🔥 Améliorations</h2>
-
+                    <p>
+                        🔥 Braises éveillées possédées :{" "}
+                        {forge.producers.awakenedEmber}
+                    </p>
+                    <p>
+                        {emberUnlocked
+                            ? "✅ Braise éveillée débloquée"
+                            : "🔒 Braise éveillée : nécessite Force de Forge 2"}
+                    </p>
+                    {emberUnlocked && (
+                        <>
+                            <p>
+                                Prix de la prochaine Braise éveillée :{" "}
+                                {formatEchoes(emberCost)} Échos
+                            </p>
+                            <button
+                                type="button"
+                                onClick={handleBuyEmber}
+                                disabled={!canBuyEmber}
+                            >
+                                Acheter une Braise éveillée —{" "}
+                                {formatEchoes(emberCost)} Échos
+                            </button>
+                        </>
+                    )}
                     <div className="forge-upgrade-progress">
                         <p>Progression vers la prochaine amélioration</p>
-
                         <progress
                             value={upgradeProgress}
                             max={100}
                             aria-label="Progression vers la prochaine amélioration"
                         />
-
                         <p>{upgradeProgress.toFixed(0)} %</p>
                     </div>
-
                     <button
                         type="button"
-                        className={canUpgradeForge ? "forge-upgrade-ready" : ""}
+                        className={canUpgrade ? "forge-upgrade-ready" : ""}
                         onClick={handleUpgrade}
-                        disabled={!canUpgradeForge}
+                        disabled={!canUpgrade}
                     >
-                        Améliorer la Forge — {forgeUpgradeCost} Échos
-                    </button>
-
-                    <button type="button" onClick={handleReset}>
-                        Reset Forge (DEV)
+                        Améliorer la Forge — {formatEchoes(upgradeCost)} Échos
                     </button>
                 </div>
             </section>
