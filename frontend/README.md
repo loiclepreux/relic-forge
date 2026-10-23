@@ -1,75 +1,45 @@
-# React + TypeScript + Vite
+# Relic Forge — maquette locale
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Maquette jouable de la boucle de la Forge : frapper, améliorer, produire.
+Tout tourne dans le navigateur, la sauvegarde est dans `localStorage`.
 
-Currently, two official plugins are available:
+Ce n'est **pas encore le P01** de la Bible V8 (§40.5) : le P01 demande un
+serveur NestJS, PostgreSQL et un compte joueur. Ici, la limite de 5 frappes
+par seconde et la production sont calculées côté navigateur.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Lancer
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+pnpm install
+pnpm dev     # serveur de développement
+pnpm test    # tests Vitest
+pnpm build   # vérification TypeScript + build de production
+pnpm lint
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+En développement, un bouton « Réinitialiser (dev) » apparaît en bas à droite.
+Il n'existe pas dans le build de production.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Organisation
 
 ```
+src/
+  App.tsx             interface
+  game/
+    forgeEconomy.ts   calculs purs (gains, coûts, production, stades)
+    forgeActions.ts   actions du joueur (frapper, améliorer, acheter)
+    forgeState.ts     type d'état + migration des sauvegardes V1
+    forgeSave.ts      sauvegarde et chargement
+    *.test.ts         tests Vitest
+```
+
+Règles :
+- Les montants sont en milli-Échos entiers (1 Écho = 1000).
+- La production est calculée à partir de `lastProductionAt`, jamais additionnée à chaque tick.
+- Les clés de sauvegarde (`relic-forge-save`, `relic-forge-save-v2`) ne doivent jamais changer.
+
+## Valeurs provisoires (à inscrire au registre des décisions)
+
+- Braise éveillée : coût `ceil(15 × 1.15^n)`, débloquée à Force de Forge 2.
+- Stades de la Forge : seuils 5 / 10 / 20 sur la Force, en attendant le
+  niveau du joueur.
