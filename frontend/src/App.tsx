@@ -12,10 +12,10 @@ import { createInitialForgeStateV2 } from "./game/forgeState";
 import { loadForgeState, canAutoSave, saveForgeState } from "./game/forgeSave";
 import type { StrikeWindow } from "./game/forgeActions";
 import {
-    strikeForgeWithProductionV2,
-    upgradeForgeWithProductionV2,
-    buyAwakenedEmberWithProductionV2,
-    accrueProductionV2,
+    strikeForge,
+    upgradeForge,
+    buyAwakenedEmber,
+    accrueProduction,
 } from "./game/forgeActions";
 import "./App.css";
 
@@ -125,7 +125,7 @@ function App() {
     useEffect(() => {
         if (blocked) return;
         const interval = window.setInterval(() => {
-            const updated = accrueProductionV2(forgeRef.current, Date.now());
+            const updated = accrueProduction(forgeRef.current, Date.now());
             forgeRef.current = updated;
             setForge(updated);
         }, 1000);
@@ -161,7 +161,7 @@ function App() {
 
     function handleStrike() {
         if (blocked) return;
-        const result = strikeForgeWithProductionV2(
+        const result = strikeForge(
             forgeRef.current,
             strikeWindowRef.current,
             Date.now(),
@@ -186,10 +186,7 @@ function App() {
 
     function handleUpgrade() {
         if (!canUpgrade) return;
-        const updated = upgradeForgeWithProductionV2(
-            forgeRef.current,
-            Date.now(),
-        );
+        const updated = upgradeForge(forgeRef.current, Date.now());
         if (updated.forgeForce === forgeRef.current.forgeForce) return;
         forgeRef.current = updated;
         setForge(updated);
@@ -199,10 +196,7 @@ function App() {
 
     function handleBuyEmber() {
         if (!canBuyEmber) return;
-        const updated = buyAwakenedEmberWithProductionV2(
-            forgeRef.current,
-            Date.now(),
-        );
+        const updated = buyAwakenedEmber(forgeRef.current, Date.now());
         forgeRef.current = updated;
         setForge(updated);
     }
