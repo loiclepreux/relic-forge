@@ -1,3 +1,136 @@
+/* =========================================================
+   RELIC FORGE — Styles de l'interface
+   ---------------------------------------------------------
+   1.  Page et fond
+   2.  En-tête
+   3.  Disposition de la Forge et stades
+   4.  Panneaux latéraux (commun)
+   5.  Panneau Caractéristiques
+   6.  Panneau central
+   7.  Noyau de la Forge
+   8.  Ondes d'impact
+   9.  Bouton Frapper
+   10. Gain de frappe
+   11. Panneau Améliorations
+   12. Barre de progression
+   13. Messages (hors ligne, erreur)
+   14. Outil de développement
+
+   Règle d'ordre : dans chaque section, la règle de base vient
+   d'abord, puis les variantes de stade, puis les états
+   (:hover, :active). Ne pas déplacer une variante avant sa
+   règle de base : à spécificité égale, la dernière gagne.
+   ========================================================= */
+
+/* =========================================================
+   1. PAGE ET FOND
+   ========================================================= */
+
+.forge-page {
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 45%,
+            rgba(110, 55, 25, 0.12),
+            transparent 65%
+        ),
+        repeating-linear-gradient(
+            135deg,
+            transparent 0,
+            transparent 48px,
+            rgba(255, 255, 255, 0.012) 49px,
+            transparent 50px
+        ),
+        #0b0b0d;
+}
+
+/* =========================================================
+   2. EN-TÊTE
+   ========================================================= */
+
+.forge-header {
+    padding: 28px 24px;
+    margin-bottom: 24px;
+
+    text-align: center;
+
+    background: linear-gradient(
+        180deg,
+        rgba(45, 30, 20, 0.95),
+        rgba(15, 12, 15, 0.98)
+    );
+
+    border-bottom: 2px solid #8f6335;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* --- Titre RELIC FORGE --- */
+
+.forge-header h1 {
+    margin: 0;
+
+    color: #e8c58a;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+
+    text-shadow:
+        0 0 12px rgba(255, 180, 70, 0.3),
+        0 3px 5px rgba(0, 0, 0, 0.8);
+
+    animation: forge-title-glow 5s ease-in-out infinite;
+}
+
+/* --- Trait doré sous le titre --- */
+
+.forge-header h1::after {
+    content: "";
+    display: block;
+
+    width: 180px;
+    height: 2px;
+    margin: 16px auto 0;
+
+    background: linear-gradient(90deg, transparent, #d6a35e, transparent);
+
+    box-shadow: 0 0 12px rgba(255, 180, 70, 0.25);
+}
+
+/* --- Sous-titre --- */
+
+.forge-header p {
+    margin: 12px 0 0;
+
+    color: #bba88c;
+    font-size: 0.95rem;
+    font-style: italic;
+    letter-spacing: 1.5px;
+}
+
+@keyframes forge-title-glow {
+    0%,
+    100% {
+        text-shadow:
+            0 0 10px rgba(255, 180, 70, 0.2),
+            0 3px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    50% {
+        text-shadow:
+            0 0 20px rgba(255, 180, 70, 0.5),
+            0 0 35px rgba(255, 120, 30, 0.2),
+            0 3px 5px rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* =========================================================
+   3. DISPOSITION DE LA FORGE ET STADES
+   ========================================================= */
+
+/* --- Grille à trois colonnes --- */
+
 .forge {
     display: grid;
     grid-template-columns: minmax(220px, 1fr) minmax(320px, 2fr) minmax(
@@ -17,10 +150,645 @@
         filter 0.08s ease;
 }
 
+/* --- Secousse de la frappe --- */
+
 .forge-striking {
     transform: scale(0.985);
     filter: brightness(1.35);
 }
+
+/* --- Couleur de la zone selon le stade --- */
+
+/* Stade 1 : Endormie */
+.forge-stage-1 {
+    border: 1px solid #3f3f46;
+}
+
+/* Stade 2 : Éveillée */
+.forge-stage-2 {
+    border: 1px solid #a16207;
+    background: rgba(120, 53, 15, 0.08);
+    box-shadow: 0 0 14px rgba(161, 98, 7, 0.12);
+}
+
+/* Stade 3 : Ancestrale */
+.forge-stage-3 {
+    border: 1px solid #ea580c;
+    background: rgba(154, 52, 18, 0.12);
+    box-shadow: 0 0 20px rgba(234, 88, 12, 0.2);
+}
+
+/* Stade 4 : Transcendante */
+.forge-stage-4 {
+    border: 1px solid #dc2626;
+    background: rgba(127, 29, 29, 0.12);
+    box-shadow: 0 0 24px rgba(220, 38, 38, 0.18);
+}
+
+/* =========================================================
+   4. PANNEAUX LATÉRAUX (COMMUN)
+   ========================================================= */
+
+.forge-stats-panel,
+.forge-upgrades-panel {
+    width: 100%;
+    padding: 24px;
+
+    border: 1px solid;
+    border-radius: 12px;
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 0, 0, 0.2);
+
+    outline: 1px solid rgba(220, 170, 100, 0.15);
+    outline-offset: -8px;
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+/* --- Titres des panneaux --- */
+
+.forge-stats-panel h2,
+.forge-upgrades-panel h2 {
+    width: 100%;
+    padding-bottom: 16px;
+
+    color: #e8c58a;
+    font-size: 1.3rem;
+
+    border-bottom: 1px solid rgba(220, 170, 100, 0.3);
+
+    text-shadow: 0 0 10px rgba(255, 180, 70, 0.15);
+}
+
+/* --- Losanges autour des titres --- */
+
+.forge-stats-panel h2::before,
+.forge-upgrades-panel h2::before {
+    content: "◆";
+    margin-right: 12px;
+
+    color: #b88a50;
+    font-size: 0.65rem;
+    vertical-align: middle;
+}
+
+.forge-stats-panel h2::after,
+.forge-upgrades-panel h2::after {
+    content: "◆";
+    margin-left: 12px;
+
+    color: #b88a50;
+    font-size: 0.65rem;
+    vertical-align: middle;
+}
+
+/* =========================================================
+   5. PANNEAU CARACTÉRISTIQUES (pierre ancienne)
+   ========================================================= */
+
+.forge-stats-panel {
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(100, 110, 130, 0.12),
+            transparent 60%
+        ),
+        linear-gradient(145deg, rgba(30, 30, 38, 0.95), rgba(12, 12, 18, 0.98));
+
+    border-color: rgba(140, 155, 180, 0.35);
+}
+
+.forge-stats-panel:hover {
+    border-color: rgba(170, 190, 220, 0.65);
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.4),
+        0 0 22px rgba(120, 150, 190, 0.15);
+}
+
+.forge-stats-panel h2 {
+    margin-top: 0;
+}
+
+/* --- Plaque du stade de Forge --- */
+
+.forge-stats-panel .forge-label {
+    display: inline-block;
+
+    padding: 10px 22px;
+    margin: 12px 0 20px;
+
+    color: #ffd27a;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(100, 60, 25, 0.35),
+        rgba(30, 20, 15, 0.9)
+    );
+
+    border: 1px solid rgba(220, 170, 100, 0.5);
+    border-radius: 6px;
+
+    box-shadow:
+        inset 0 0 12px rgba(255, 170, 60, 0.08),
+        0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Lignes des caractéristiques --- */
+
+.forge-stats-panel p:not(.forge-label) {
+    padding: 12px 8px;
+    margin: 0;
+
+    color: #d6c4aa;
+    font-size: 0.95rem;
+
+    border-bottom: 1px solid rgba(180, 130, 80, 0.12);
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.forge-stats-panel p:not(.forge-label):hover {
+    background-color: rgba(180, 110, 45, 0.12);
+    color: #ffd89a;
+}
+
+/* =========================================================
+   6. PANNEAU CENTRAL
+   ========================================================= */
+
+/* --- Halo de braises qui respire --- */
+
+.forge-center-panel {
+    position: relative;
+
+    width: 100%;
+    min-height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background: radial-gradient(
+        circle at 50% 42%,
+        rgba(255, 120, 35, 0.13) 0%,
+        rgba(130, 55, 20, 0.07) 35%,
+        transparent 70%
+    );
+
+    border-radius: 16px;
+
+    animation: forge-embers-breath 5s ease-in-out infinite;
+}
+
+/* --- Solde d'Échos --- */
+
+.forge-center-panel h2 {
+    margin: 20px 0;
+
+    color: #ffd27a;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    text-shadow:
+        0 0 10px rgba(255, 180, 70, 0.4),
+        0 0 25px rgba(255, 120, 30, 0.2);
+}
+
+@keyframes forge-embers-breath {
+    0%,
+    100% {
+        background-size: 100% 100%;
+    }
+
+    50% {
+        background-size: 115% 115%;
+    }
+}
+
+/* =========================================================
+   7. NOYAU DE LA FORGE
+   ========================================================= */
+
+.forge-core {
+    width: 240px;
+    height: 240px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 2px solid #52525b;
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(63, 63, 70, 0.8) 0%,
+        rgba(24, 24, 27, 0.95) 70%
+    );
+
+    color: #f4f4f5;
+    cursor: pointer;
+
+    transition:
+        transform 0.1s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* --- Anneau métallique --- */
+
+.forge-core::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+
+    border: 2px solid rgba(210, 160, 90, 0.45);
+    border-radius: 50%;
+
+    box-shadow:
+        inset 0 0 12px rgba(0, 0, 0, 0.65),
+        0 0 10px rgba(255, 160, 60, 0.12);
+
+    pointer-events: none;
+}
+
+/* --- Gravures runiques (rotation lente) --- */
+
+.forge-core::after {
+    content: "";
+    position: absolute;
+    inset: 24px;
+
+    border: 1px dashed rgba(220, 170, 100, 0.35);
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 8px rgba(255, 150, 50, 0.1),
+        inset 0 0 8px rgba(255, 150, 50, 0.08);
+
+    pointer-events: none;
+
+    animation: forge-runes-rotation 30s linear infinite;
+}
+
+/* --- Symbole magique (pulsation) --- */
+
+.forge-core-symbol {
+    position: relative;
+    z-index: 1;
+
+    font-size: 3rem;
+    line-height: 1;
+    pointer-events: none;
+
+    animation: forge-symbol-glow 3s ease-in-out infinite;
+}
+
+/* --- Couleurs du noyau selon le stade --- */
+
+/* Stade 1 : Endormie */
+.forge-core-stage-1 {
+    border-color: #52525b;
+
+    background: radial-gradient(
+        circle,
+        rgba(82, 82, 91, 0.35) 0%,
+        rgba(39, 39, 42, 0.55) 40%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    box-shadow:
+        0 0 8px rgba(82, 82, 91, 0.18),
+        inset 0 0 18px rgba(0, 0, 0, 0.35);
+}
+
+.forge-core-stage-1 .forge-core-symbol {
+    color: #a1a1aa;
+    text-shadow: 0 0 5px rgba(161, 161, 170, 0.25);
+}
+
+/* Stade 2 : Éveillée */
+.forge-core-stage-2 {
+    border-color: #a16207;
+
+    background: radial-gradient(
+        circle,
+        rgba(217, 119, 6, 0.4) 0%,
+        rgba(120, 53, 15, 0.45) 40%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    box-shadow:
+        0 0 12px rgba(217, 119, 6, 0.22),
+        0 0 24px rgba(161, 98, 7, 0.12);
+}
+
+.forge-core-stage-2 .forge-core-symbol {
+    color: #fde68a;
+    text-shadow:
+        0 0 6px rgba(253, 230, 138, 0.45),
+        0 0 12px rgba(217, 119, 6, 0.3);
+}
+
+/* Stade 3 : Ancestrale */
+.forge-core-stage-3 {
+    border-color: #ea580c;
+
+    background: radial-gradient(
+        circle,
+        rgba(249, 115, 22, 0.55) 0%,
+        rgba(154, 52, 18, 0.55) 40%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    box-shadow:
+        0 0 18px rgba(249, 115, 22, 0.32),
+        0 0 36px rgba(234, 88, 12, 0.18);
+}
+
+.forge-core-stage-3 .forge-core-symbol {
+    color: #ffedd5;
+    text-shadow:
+        0 0 8px rgba(255, 237, 213, 0.6),
+        0 0 16px rgba(249, 115, 22, 0.45);
+}
+
+/* Stade 4 : Transcendante (le noyau pulse) */
+.forge-core-stage-4 {
+    border-color: #ef4444;
+
+    background: radial-gradient(
+        circle,
+        rgba(239, 68, 68, 0.55) 0%,
+        rgba(127, 29, 29, 0.55) 35%,
+        rgba(24, 24, 27, 0.98) 75%
+    );
+
+    animation: forge-core-pulse 2.4s ease-in-out infinite;
+}
+
+.forge-core-stage-4 .forge-core-symbol {
+    color: #fee2e2;
+    text-shadow:
+        0 0 8px rgba(254, 226, 226, 0.8),
+        0 0 18px rgba(239, 68, 68, 0.65);
+}
+
+/* --- États : frappe, survol, clic --- */
+
+.forge-core-striking {
+    transform: scale(0.92);
+    filter: brightness(1.5);
+}
+
+.forge-core:hover {
+    transform: scale(1.04);
+    filter: brightness(1.15);
+
+    border-color: #d6a35e;
+
+    box-shadow:
+        0 0 20px rgba(255, 170, 70, 0.3),
+        0 0 45px rgba(255, 110, 30, 0.15),
+        inset 0 0 25px rgba(255, 160, 60, 0.12);
+}
+
+.forge-core:active {
+    transform: scale(0.92);
+}
+
+/* --- Lueur au survol selon le stade --- */
+
+.forge-core-stage-1:hover {
+    border-color: #a1a1aa;
+    box-shadow:
+        0 0 20px rgba(161, 161, 170, 0.3),
+        0 0 45px rgba(113, 113, 122, 0.15);
+}
+
+.forge-core-stage-2:hover {
+    border-color: #fbbf24;
+    box-shadow:
+        0 0 20px rgba(251, 191, 36, 0.4),
+        0 0 45px rgba(217, 119, 6, 0.2);
+}
+
+.forge-core-stage-3:hover {
+    border-color: #fb923c;
+    box-shadow:
+        0 0 25px rgba(249, 115, 22, 0.5),
+        0 0 50px rgba(234, 88, 12, 0.25);
+}
+
+.forge-core-stage-4:hover {
+    border-color: #f87171;
+    box-shadow:
+        0 0 30px rgba(239, 68, 68, 0.6),
+        0 0 60px rgba(220, 38, 38, 0.3);
+}
+
+/* --- Animations du noyau --- */
+
+@keyframes forge-runes-rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes forge-symbol-glow {
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+@keyframes forge-core-pulse {
+    0%,
+    100% {
+        box-shadow:
+            0 0 18px rgba(239, 68, 68, 0.35),
+            0 0 40px rgba(220, 38, 38, 0.18);
+        filter: brightness(1);
+    }
+
+    50% {
+        box-shadow:
+            0 0 34px rgba(239, 68, 68, 0.65),
+            0 0 70px rgba(220, 38, 38, 0.4);
+        filter: brightness(1.12);
+    }
+}
+
+/* =========================================================
+   8. ONDES D'IMPACT
+   ========================================================= */
+
+.forge-impact-ring {
+    position: absolute;
+    inset: 0;
+
+    border: 2px solid rgba(255, 180, 100, 0.85);
+    border-radius: 50%;
+
+    opacity: 0;
+    transform: scale(0.85);
+
+    pointer-events: none;
+}
+
+.forge-impact-ring-active {
+    animation: forge-impact-wave 0.35s ease-out forwards;
+}
+
+/* --- Couleur de l'onde selon le stade --- */
+
+.forge-impact-ring-stage-1 {
+    border-color: rgba(170, 180, 190, 0.75);
+}
+
+.forge-impact-ring-stage-2 {
+    border-color: rgba(255, 190, 80, 0.85);
+}
+
+.forge-impact-ring-stage-3 {
+    border-color: rgba(255, 110, 35, 0.9);
+}
+
+.forge-impact-ring-stage-4 {
+    border-color: rgba(255, 45, 45, 0.95);
+}
+
+@keyframes forge-impact-wave {
+    0% {
+        opacity: 0.9;
+        transform: scale(0.85);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* =========================================================
+   9. BOUTON FRAPPER
+   ========================================================= */
+
+.forge-button {
+    width: 220px;
+    min-height: 56px;
+    padding: 14px 24px;
+
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 8px;
+
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -4px 0 rgba(0, 0, 0, 0.3),
+        0 6px 18px rgba(0, 0, 0, 0.45);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.08s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* --- Couleurs du bouton selon le stade --- */
+
+/* Stade 1 : Endormie */
+.forge-button-stage-1 {
+    border-color: #52525b;
+    background: rgba(39, 39, 42, 0.6);
+    color: #d4d4d8;
+}
+
+.forge-button-stage-1:hover {
+    background: rgba(63, 63, 70, 0.7);
+    box-shadow: 0 0 12px rgba(113, 113, 122, 0.25);
+}
+
+/* Stade 2 : Éveillée */
+.forge-button-stage-2 {
+    border-color: #a16207;
+    background: rgba(120, 53, 15, 0.22);
+    color: #fef3c7;
+}
+
+.forge-button-stage-2:hover {
+    background: rgba(146, 64, 14, 0.32);
+    box-shadow: 0 0 16px rgba(217, 119, 6, 0.28);
+}
+
+/* Stade 3 : Ancestrale */
+.forge-button-stage-3 {
+    border-color: #ea580c;
+    background: rgba(154, 52, 18, 0.3);
+    color: #ffedd5;
+}
+
+.forge-button-stage-3:hover {
+    background: rgba(194, 65, 12, 0.42);
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.38);
+}
+
+/* Stade 4 : Transcendante */
+.forge-button-stage-4 {
+    border-color: #dc2626;
+    background: rgba(127, 29, 29, 0.35);
+    color: #fef2f2;
+}
+
+.forge-button-stage-4:hover {
+    background: rgba(153, 27, 27, 0.5);
+    box-shadow: 0 0 24px rgba(220, 38, 38, 0.4);
+}
+
+/* --- Effet de pression (doit rester après les :hover) --- */
+
+.forge-button:active {
+    transform: translateY(3px) scale(0.98);
+
+    box-shadow:
+        inset 0 3px 8px rgba(0, 0, 0, 0.55),
+        0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================================
+   10. GAIN DE FRAPPE
+   ========================================================= */
 
 .strike-gain {
     display: block;
@@ -53,323 +821,201 @@
     }
 }
 
-.forge-button {
-    width: 220px;
-    min-height: 56px;
-    padding: 14px 24px;
+/* =========================================================
+   11. PANNEAU AMÉLIORATIONS (braises)
+   ========================================================= */
 
-    border-radius: 10px;
+.forge-upgrades-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
 
-    font-size: 1.15rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(180, 85, 25, 0.16),
+            transparent 60%
+        ),
+        linear-gradient(145deg, rgba(35, 25, 20, 0.95), rgba(15, 12, 15, 0.98));
+
+    border-color: rgba(220, 145, 65, 0.45);
+}
+
+.forge-upgrades-panel:hover {
+    border-color: rgba(255, 180, 85, 0.7);
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.4),
+        0 0 22px rgba(255, 140, 45, 0.18);
+}
+
+.forge-upgrades-panel h2 {
+    margin: 0 0 12px;
+}
+
+/* --- Boutons d'achat --- */
+
+.forge-upgrades-panel > button {
+    width: 100%;
+    max-width: 320px;
+    min-height: 48px;
+    padding: 12px 18px;
+
+    border-radius: 8px;
+    font-weight: 600;
 
     cursor: pointer;
-
     transition:
-        transform 0.08s ease,
+        transform 0.15s ease,
         background-color 0.2s ease,
         box-shadow 0.2s ease;
 }
 
-/* //////////////// forge ///////////////////// */
-
-.forge-core {
-    width: 240px;
-    height: 240px;
-    margin: 20px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    border: 2px solid #52525b;
-    border-radius: 50%;
-
-    background: radial-gradient(
-        circle,
-        rgba(63, 63, 70, 0.8) 0%,
-        rgba(24, 24, 27, 0.95) 70%
-    );
-
-    color: #f4f4f5;
-    cursor: pointer;
-
-    transition:
-        transform 0.1s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
+.forge-upgrades-panel > button:hover:not(:disabled) {
+    transform: translateY(-2px);
 }
 
-.forge-core-symbol {
-    font-size: 3rem;
-    line-height: 1;
-    pointer-events: none;
+.forge-upgrades-panel > button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.forge-core-striking {
-    transform: scale(0.92);
-    filter: brightness(1.5);
+/* --- Premier bouton du panneau : style bronze --- */
+
+.forge-upgrades-panel > button:first-of-type {
+    background: linear-gradient(180deg, #69401f 0%, #382416 100%);
+
+    border: 1px solid #a7773e;
+    color: #ffe0a3;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 220, 150, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.forge-core:hover {
-    transform: scale(1.04);
-    filter: brightness(1.15);
+.forge-upgrades-panel > button:first-of-type:hover:not(:disabled) {
+    background: linear-gradient(180deg, #865329 0%, #4b2e1b 100%);
+
+    border-color: #e2a75b;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 220, 150, 0.3),
+        0 0 18px rgba(255, 160, 60, 0.3),
+        0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
-.forge-core:active {
-    transform: scale(0.92);
+/* --- Amélioration disponible : lueur --- */
+
+.forge-upgrade-ready {
+    border: 1px solid #ffcc66;
+    box-shadow: 0 0 12px rgba(255, 170, 50, 0.5);
+
+    animation: forge-upgrade-glow 2s ease-in-out infinite;
 }
 
-.forge-impact-ring {
-    position: absolute;
-    inset: 0;
+@keyframes forge-upgrade-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgba(255, 170, 50, 0.3);
+    }
 
-    border: 2px solid rgba(255, 180, 100, 0.85);
-    border-radius: 50%;
-
-    opacity: 0;
-    transform: scale(0.85);
-
-    pointer-events: none;
+    50% {
+        box-shadow: 0 0 22px rgba(255, 190, 70, 0.8);
+    }
 }
 
-.forge-impact-ring-stage-1 {
-    border-color: rgba(170, 180, 190, 0.75);
+/* --- Message « Forge améliorée ! » --- */
+
+.forge-upgrade-feedback {
+    margin: 12px 0;
+
+    color: #ffd27a;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+
+    text-shadow: 0 0 12px rgba(255, 170, 50, 0.6);
+
+    animation: forge-upgrade-feedback-animation 1s ease-out forwards;
 }
 
-.forge-impact-ring-stage-2 {
-    border-color: rgba(255, 190, 80, 0.85);
-}
-
-.forge-impact-ring-stage-3 {
-    border-color: rgba(255, 110, 35, 0.9);
-}
-
-.forge-impact-ring-stage-4 {
-    border-color: rgba(255, 45, 45, 0.95);
-}
-
-.forge-impact-ring-active {
-    animation: forge-impact-wave 0.35s ease-out forwards;
-}
-
-@keyframes forge-impact-wave {
+@keyframes forge-upgrade-feedback-animation {
     0% {
-        opacity: 0.9;
-        transform: scale(0.85);
+        opacity: 0;
+        transform: translateY(10px) scale(0.9);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translateY(0) scale(1.08);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1);
     }
 
     100% {
         opacity: 0;
-        transform: scale(1.5);
+        transform: translateY(-15px) scale(1);
     }
 }
 
-/* //////////////// stage 1 ///////////////////// */
+/* =========================================================
+   12. BARRE DE PROGRESSION
+   ========================================================= */
 
-.forge-stage-1 {
-    border: 1px solid #3f3f46;
-}
-
-.forge-button-stage-1 {
-    border: 1px solid #52525b;
-    background: rgba(39, 39, 42, 0.6);
-    color: #d4d4d8;
-    box-shadow: 0 0 8px rgba(82, 82, 91, 0.15);
-}
-
-.forge-button-stage-1:hover {
-    background: rgba(63, 63, 70, 0.7);
-    box-shadow: 0 0 12px rgba(113, 113, 122, 0.25);
-    cursor: pointer;
-}
-
-.forge-button-stage-1:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 16px rgba(113, 113, 122, 0.35);
-}
-
-.forge-core-stage-1 {
-    border-color: #52525b;
-
-    background: radial-gradient(
-        circle,
-        rgba(82, 82, 91, 0.35) 0%,
-        rgba(39, 39, 42, 0.55) 40%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
+.forge-upgrade-progress {
+    width: 100%;
+    max-width: 360px;
+    margin: 20px auto;
+    text-align: center;
     box-shadow:
-        0 0 8px rgba(82, 82, 91, 0.18),
-        inset 0 0 18px rgba(0, 0, 0, 0.35);
+        inset 0 2px 6px rgba(0, 0, 0, 0.7),
+        0 0 12px rgba(255, 170, 60, 0.18);
 }
 
-.forge-core-stage-1 .forge-core-symbol {
-    color: #a1a1aa;
-    text-shadow: 0 0 5px rgba(161, 161, 170, 0.25);
+.forge-upgrade-progress p {
+    margin: 8px 0;
+    color: #d6b88a;
+    font-size: 0.9rem;
 }
 
-/* //////////////// stage 2 ///////////////////// */
+.forge-upgrade-progress progress {
+    display: block;
+    width: 100%;
+    height: 14px;
 
-.forge-stage-2 {
-    border: 1px solid #a16207;
-    background: rgba(120, 53, 15, 0.08);
-    box-shadow: 0 0 14px rgba(161, 98, 7, 0.12);
+    appearance: none;
+    border: 1px solid #70502c;
+    border-radius: 8px;
+    overflow: hidden;
+
+    background-color: #211b17;
 }
 
-.forge-button-stage-2 {
-    border: 1px solid #a16207;
-    background: rgba(120, 53, 15, 0.22);
-    color: #fef3c7;
-    box-shadow: 0 0 10px rgba(161, 98, 7, 0.18);
+/* --- Rendu Chrome / Edge / Safari --- */
+
+.forge-upgrade-progress progress::-webkit-progress-bar {
+    background-color: #211b17;
 }
 
-.forge-button-stage-2:hover {
-    background: rgba(146, 64, 14, 0.32);
-    box-shadow: 0 0 16px rgba(217, 119, 6, 0.28);
-    cursor: pointer;
+.forge-upgrade-progress progress::-webkit-progress-value {
+    background: linear-gradient(90deg, #8f4d20, #d9943b, #ffd27a);
+    border-radius: 8px;
 }
 
-.forge-button-stage-2:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 20px rgba(217, 119, 6, 0.38);
+/* --- Rendu Firefox --- */
+
+.forge-upgrade-progress progress::-moz-progress-bar {
+    background: linear-gradient(90deg, #8f4d20, #d9943b, #ffd27a);
+    border-radius: 8px;
 }
 
-.forge-core-stage-2 {
-    border-color: #a16207;
-
-    background: radial-gradient(
-        circle,
-        rgba(217, 119, 6, 0.4) 0%,
-        rgba(120, 53, 15, 0.45) 40%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    box-shadow:
-        0 0 12px rgba(217, 119, 6, 0.22),
-        0 0 24px rgba(161, 98, 7, 0.12);
-}
-
-.forge-core-stage-2 .forge-core-symbol {
-    color: #fde68a;
-    text-shadow:
-        0 0 6px rgba(253, 230, 138, 0.45),
-        0 0 12px rgba(217, 119, 6, 0.3);
-}
-
-/* //////////////// stage 3 ///////////////////// */
-
-.forge-stage-3 {
-    border: 1px solid #ea580c;
-    background: rgba(154, 52, 18, 0.12);
-    box-shadow: 0 0 20px rgba(234, 88, 12, 0.2);
-}
-
-.forge-button-stage-3 {
-    border: 1px solid #ea580c;
-    background: rgba(154, 52, 18, 0.3);
-    color: #ffedd5;
-    box-shadow: 0 0 14px rgba(234, 88, 12, 0.25);
-}
-
-.forge-button-stage-3:hover {
-    background: rgba(194, 65, 12, 0.42);
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.38);
-    cursor: pointer;
-}
-
-.forge-button-stage-3:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 26px rgba(249, 115, 22, 0.5);
-}
-
-.forge-core-stage-3 {
-    border-color: #ea580c;
-
-    background: radial-gradient(
-        circle,
-        rgba(249, 115, 22, 0.55) 0%,
-        rgba(154, 52, 18, 0.55) 40%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    box-shadow:
-        0 0 18px rgba(249, 115, 22, 0.32),
-        0 0 36px rgba(234, 88, 12, 0.18);
-}
-
-.forge-core-stage-3 .forge-core-symbol {
-    color: #ffedd5;
-    text-shadow:
-        0 0 8px rgba(255, 237, 213, 0.6),
-        0 0 16px rgba(249, 115, 22, 0.45);
-}
-
-/* //////////////// stage 4 ///////////////////// */
-
-.forge-stage-4 {
-    border: 1px solid #dc2626;
-    background: rgba(127, 29, 29, 0.12);
-    box-shadow: 0 0 24px rgba(220, 38, 38, 0.18);
-}
-
-.forge-button-stage-4 {
-    border: 1px solid #dc2626;
-    background: rgba(127, 29, 29, 0.35);
-    color: #fef2f2;
-    box-shadow: 0 0 16px rgba(220, 38, 38, 0.25);
-}
-
-.forge-button-stage-4:hover {
-    background: rgba(153, 27, 27, 0.5);
-    box-shadow: 0 0 24px rgba(220, 38, 38, 0.4);
-    cursor: pointer;
-}
-
-.forge-button-stage-4:active {
-    transform: scale(0.97);
-    box-shadow: 0 0 32px rgba(220, 38, 38, 0.55);
-}
-
-.forge-core-stage-4 {
-    border-color: #ef4444;
-
-    background: radial-gradient(
-        circle,
-        rgba(239, 68, 68, 0.55) 0%,
-        rgba(127, 29, 29, 0.55) 35%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    animation: forge-core-pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes forge-core-pulse {
-    0%,
-    100% {
-        box-shadow:
-            0 0 18px rgba(239, 68, 68, 0.35),
-            0 0 40px rgba(220, 38, 38, 0.18);
-        filter: brightness(1);
-    }
-
-    50% {
-        box-shadow:
-            0 0 34px rgba(239, 68, 68, 0.65),
-            0 0 70px rgba(220, 38, 38, 0.4);
-        filter: brightness(1.12);
-    }
-}
-
-.forge-core-stage-4 .forge-core-symbol {
-    color: #fee2e2;
-    text-shadow:
-        0 0 8px rgba(254, 226, 226, 0.8),
-        0 0 18px rgba(239, 68, 68, 0.65);
-}
-
-/* //////////////// offline msg ///////////////////// */
+/* =========================================================
+   13. MESSAGES (HORS LIGNE, ERREUR DE SAUVEGARDE)
+   ========================================================= */
 
 .forge-offline-message {
     margin: 20px auto;
@@ -413,670 +1059,9 @@
     background: rgba(255, 180, 80, 0.25);
 }
 
-/* //////////////// upgrade barre ///////////////////// */
-
-.forge-upgrade-progress {
-    width: 100%;
-    max-width: 360px;
-    margin: 20px auto;
-    text-align: center;
-    box-shadow:
-        inset 0 2px 6px rgba(0, 0, 0, 0.7),
-        0 0 12px rgba(255, 170, 60, 0.18);
-}
-
-.forge-upgrade-progress p {
-    margin: 8px 0;
-    color: #d6b88a;
-    font-size: 0.9rem;
-}
-
-.forge-upgrade-progress progress {
-    display: block;
-    width: 100%;
-    height: 14px;
-
-    appearance: none;
-    border: 1px solid #70502c;
-    border-radius: 8px;
-    overflow: hidden;
-
-    background-color: #211b17;
-}
-
-.forge-upgrade-progress progress::-webkit-progress-bar {
-    background-color: #211b17;
-}
-
-.forge-upgrade-progress progress::-webkit-progress-value {
-    background: linear-gradient(90deg, #8f4d20, #d9943b, #ffd27a);
-    border-radius: 8px;
-}
-
-.forge-upgrade-progress progress::-moz-progress-bar {
-    background: linear-gradient(90deg, #8f4d20, #d9943b, #ffd27a);
-    border-radius: 8px;
-}
-
-.forge-upgrade-ready {
-    border: 1px solid #ffcc66;
-    box-shadow: 0 0 12px rgba(255, 170, 50, 0.5);
-
-    animation: forge-upgrade-glow 2s ease-in-out infinite;
-}
-
-@keyframes forge-upgrade-glow {
-    0%,
-    100% {
-        box-shadow: 0 0 8px rgba(255, 170, 50, 0.3);
-    }
-
-    50% {
-        box-shadow: 0 0 22px rgba(255, 190, 70, 0.8);
-    }
-}
-
-.forge-upgrade-feedback {
-    margin: 12px 0;
-
-    color: #ffd27a;
-    font-size: 1.1rem;
-    font-weight: bold;
-    text-align: center;
-
-    text-shadow: 0 0 12px rgba(255, 170, 50, 0.6);
-
-    animation: forge-upgrade-feedback-animation 1s ease-out forwards;
-}
-
-@keyframes forge-upgrade-feedback-animation {
-    0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.9);
-    }
-
-    25% {
-        opacity: 1;
-        transform: translateY(0) scale(1.08);
-    }
-
-    70% {
-        opacity: 1;
-        transform: translateY(-5px) scale(1);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateY(-15px) scale(1);
-    }
-}
-
-.forge-stats-panel {
-    width: 100%;
-    padding: 24px;
-
-    background: linear-gradient(
-        145deg,
-        rgba(35, 30, 30, 0.95),
-        rgba(15, 12, 15, 0.98)
-    );
-
-    border: 1px solid rgba(180, 130, 80, 0.35);
-    border-radius: 12px;
-
-    box-shadow:
-        inset 0 0 25px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(0, 0, 0, 0.2);
-}
-
-.forge-stats-panel h2 {
-    margin-top: 0;
-    color: #e8c58a;
-    font-size: 1.3rem;
-}
-
-.forge-center-panel {
-    width: 100%;
-    min-height: 100%;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-}
-
-.forge-upgrades-panel {
-    width: 100%;
-    padding: 24px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-
-    background: linear-gradient(
-        145deg,
-        rgba(35, 25, 20, 0.95),
-        rgba(15, 12, 15, 0.98)
-    );
-
-    border: 1px solid rgba(180, 130, 80, 0.35);
-    border-radius: 12px;
-
-    box-shadow:
-        inset 0 0 25px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(0, 0, 0, 0.2);
-}
-
-.forge-upgrades-panel h2 {
-    margin: 0 0 12px;
-    color: #e8c58a;
-    font-size: 1.3rem;
-}
-
-.forge-upgrades-panel > button {
-    width: 100%;
-    max-width: 320px;
-    min-height: 48px;
-    padding: 12px 18px;
-
-    border-radius: 8px;
-    font-weight: 600;
-
-    cursor: pointer;
-    transition:
-        transform 0.15s ease,
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.forge-upgrades-panel > button:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-
-.forge-upgrades-panel > button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.forge-center-panel h2 {
-    margin: 20px 0;
-
-    color: #ffd27a;
-    font-size: 2.2rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-
-    text-shadow:
-        0 0 10px rgba(255, 180, 70, 0.4),
-        0 0 25px rgba(255, 120, 30, 0.2);
-}
-
-/* ========== EN-TÊTE DARK FANTASY ========== */
-
-.forge-header {
-    padding: 28px 24px;
-    margin-bottom: 24px;
-
-    text-align: center;
-
-    background: linear-gradient(
-        180deg,
-        rgba(45, 30, 20, 0.95),
-        rgba(15, 12, 15, 0.98)
-    );
-
-    border-bottom: 2px solid #8f6335;
-
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
-}
-
-.forge-header h1 {
-    margin: 0;
-
-    color: #e8c58a;
-    font-size: 2.8rem;
-    font-weight: 900;
-    letter-spacing: 6px;
-
-    text-shadow:
-        0 0 12px rgba(255, 180, 70, 0.3),
-        0 3px 5px rgba(0, 0, 0, 0.8);
-}
-
-.forge-header p {
-    margin: 12px 0 0;
-
-    color: #bba88c;
-    font-size: 0.95rem;
-    font-style: italic;
-    letter-spacing: 1.5px;
-}
-
-/* ========== AMBIANCE DU PANNEAU CENTRAL ========== */
-
-.forge-center-panel {
-    position: relative;
-
-    background: radial-gradient(
-        ellipse at center,
-        rgba(130, 65, 25, 0.16) 0%,
-        rgba(45, 25, 20, 0.08) 45%,
-        transparent 75%
-    );
-
-    border-radius: 16px;
-}
-
-/* ========== ANNEAU MÉTALLIQUE DU NOYAU ========== */
-
-.forge-core::before {
-    content: "";
-    position: absolute;
-    inset: 12px;
-
-    border: 2px solid rgba(210, 160, 90, 0.45);
-    border-radius: 50%;
-
-    box-shadow:
-        inset 0 0 12px rgba(0, 0, 0, 0.65),
-        0 0 10px rgba(255, 160, 60, 0.12);
-
-    pointer-events: none;
-}
-
-/* ========== GRAVURES RUNIQUES DU NOYAU ========== */
-
-.forge-core::after {
-    content: "";
-    position: absolute;
-    inset: 24px;
-
-    border: 1px dashed rgba(220, 170, 100, 0.35);
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 8px rgba(255, 150, 50, 0.1),
-        inset 0 0 8px rgba(255, 150, 50, 0.08);
-
-    pointer-events: none;
-}
-
-/* ========== ROTATION DES GRAVURES RUNIQUES ========== */
-
-.forge-core::after {
-    animation: forge-runes-rotation 30s linear infinite;
-}
-
-@keyframes forge-runes-rotation {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* ========== PULSATION DU SYMBOLE MAGIQUE ========== */
-
-.forge-core-symbol {
-    position: relative;
-    z-index: 1;
-
-    animation: forge-symbol-glow 3s ease-in-out infinite;
-}
-
-@keyframes forge-symbol-glow {
-    0%,
-    100% {
-        opacity: 0.8;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.15);
-    }
-}
-
-/* ========== ORNEMENTS DES PANNEAUX RPG ========== */
-
-.forge-stats-panel,
-.forge-upgrades-panel {
-    outline: 1px solid rgba(220, 170, 100, 0.15);
-    outline-offset: -8px;
-}
-
-/* ========== TITRES DES PANNEAUX RPG ========== */
-
-.forge-stats-panel h2,
-.forge-upgrades-panel h2 {
-    width: 100%;
-    padding-bottom: 16px;
-
-    border-bottom: 1px solid rgba(220, 170, 100, 0.3);
-
-    text-shadow: 0 0 10px rgba(255, 180, 70, 0.15);
-}
-
-/* ========== LIGNES DES CARACTÉRISTIQUES ========== */
-
-.forge-stats-panel p:not(.forge-label) {
-    padding: 12px 8px;
-    margin: 0;
-
-    color: #d6c4aa;
-    font-size: 0.95rem;
-
-    border-bottom: 1px solid rgba(180, 130, 80, 0.12);
-}
-
-/* ========== SURVOL DES CARACTÉRISTIQUES ========== */
-
-.forge-stats-panel p:not(.forge-label) {
-    transition:
-        background-color 0.2s ease,
-        color 0.2s ease;
-}
-
-.forge-stats-panel p:not(.forge-label):hover {
-    background-color: rgba(180, 110, 45, 0.12);
-    color: #ffd89a;
-}
-
-/* ========== PLAQUE DU STADE DE FORGE ========== */
-
-.forge-stats-panel .forge-label {
-    display: inline-block;
-
-    padding: 10px 22px;
-    margin: 12px 0 20px;
-
-    color: #ffd27a;
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-
-    background: linear-gradient(
-        135deg,
-        rgba(100, 60, 25, 0.35),
-        rgba(30, 20, 15, 0.9)
-    );
-
-    border: 1px solid rgba(220, 170, 100, 0.5);
-    border-radius: 6px;
-
-    box-shadow:
-        inset 0 0 12px rgba(255, 170, 60, 0.08),
-        0 0 12px rgba(0, 0, 0, 0.3);
-}
-
-/* ========== BOUTON D'AMÉLIORATION RPG ========== */
-
-.forge-upgrades-panel > button:first-of-type {
-    background: linear-gradient(180deg, #69401f 0%, #382416 100%);
-
-    border: 1px solid #a7773e;
-    color: #ffe0a3;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255, 220, 150, 0.2),
-        0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-/* ========== SURVOL DU BOUTON D'AMÉLIORATION ========== */
-
-.forge-upgrades-panel > button:first-of-type:hover:not(:disabled) {
-    background: linear-gradient(180deg, #865329 0%, #4b2e1b 100%);
-
-    border-color: #e2a75b;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255, 220, 150, 0.3),
-        0 0 18px rgba(255, 160, 60, 0.3),
-        0 6px 16px rgba(0, 0, 0, 0.45);
-}
-
-/* ========== BOUTON FRAPPER : STYLE RPG ========== */
-
-.forge-button {
-    border-width: 2px;
-    border-style: solid;
-
-    border-radius: 8px;
-
-    box-shadow:
-        inset 0 2px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -4px 0 rgba(0, 0, 0, 0.3),
-        0 6px 18px rgba(0, 0, 0, 0.45);
-
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-/* ========== EFFET DE PRESSION DU BOUTON FRAPPER ========== */
-
-.forge-button:active {
-    transform: translateY(3px) scale(0.98);
-
-    box-shadow:
-        inset 0 3px 8px rgba(0, 0, 0, 0.55),
-        0 2px 5px rgba(0, 0, 0, 0.35);
-}
-
-/* ========== LUEUR AU SURVOL DU NOYAU ========== */
-
-.forge-core:hover {
-    border-color: #d6a35e;
-
-    box-shadow:
-        0 0 20px rgba(255, 170, 70, 0.3),
-        0 0 45px rgba(255, 110, 30, 0.15),
-        inset 0 0 25px rgba(255, 160, 60, 0.12);
-}
-
-/* ========== LUEUR DU NOYAU SELON LE STADE ========== */
-
-.forge-core-stage-1:hover {
-    border-color: #a1a1aa;
-    box-shadow:
-        0 0 20px rgba(161, 161, 170, 0.3),
-        0 0 45px rgba(113, 113, 122, 0.15);
-}
-
-.forge-core-stage-2:hover {
-    border-color: #fbbf24;
-    box-shadow:
-        0 0 20px rgba(251, 191, 36, 0.4),
-        0 0 45px rgba(217, 119, 6, 0.2);
-}
-
-.forge-core-stage-3:hover {
-    border-color: #fb923c;
-    box-shadow:
-        0 0 25px rgba(249, 115, 22, 0.5),
-        0 0 50px rgba(234, 88, 12, 0.25);
-}
-
-.forge-core-stage-4:hover {
-    border-color: #f87171;
-    box-shadow:
-        0 0 30px rgba(239, 68, 68, 0.6),
-        0 0 60px rgba(220, 38, 38, 0.3);
-}
-
-/* ========== FOND DARK FANTASY ========== */
-
-.forge-page {
-    min-height: 100vh;
-
-    background:
-        radial-gradient(
-            ellipse at 50% 45%,
-            rgba(110, 55, 25, 0.12),
-            transparent 65%
-        ),
-        repeating-linear-gradient(
-            135deg,
-            transparent 0,
-            transparent 48px,
-            rgba(255, 255, 255, 0.012) 49px,
-            transparent 50px
-        ),
-        #0b0b0d;
-}
-
-/* ========== HALO DE BRAISES CENTRAL ========== */
-
-.forge-center-panel {
-    background: radial-gradient(
-        circle at 50% 42%,
-        rgba(255, 120, 35, 0.13) 0%,
-        rgba(130, 55, 20, 0.07) 35%,
-        transparent 70%
-    );
-}
-
-/* ========== RESPIRATION DES BRAISES ========== */
-
-.forge-center-panel {
-    animation: forge-embers-breath 5s ease-in-out infinite;
-}
-
-@keyframes forge-embers-breath {
-    0%,
-    100% {
-        background-size: 100% 100%;
-    }
-
-    50% {
-        background-size: 115% 115%;
-    }
-}
-
-/* ========== BRAISES DU PANNEAU AMÉLIORATIONS ========== */
-
-.forge-upgrades-panel {
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(180, 85, 25, 0.16),
-            transparent 60%
-        ),
-        linear-gradient(145deg, rgba(35, 25, 20, 0.95), rgba(15, 12, 15, 0.98));
-}
-
-/* ========== PIERRE ANCIENNE : CARACTÉRISTIQUES ========== */
-
-.forge-stats-panel {
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(100, 110, 130, 0.12),
-            transparent 60%
-        ),
-        linear-gradient(145deg, rgba(30, 30, 38, 0.95), rgba(12, 12, 18, 0.98));
-}
-
-/* ========== BORDURES LUMINEUSES RPG ========== */
-
-.forge-stats-panel {
-    border-color: rgba(140, 155, 180, 0.35);
-}
-
-.forge-upgrades-panel {
-    border-color: rgba(220, 145, 65, 0.45);
-}
-
-/* ========== TRANSITIONS DES PANNEAUX RPG ========== */
-
-.forge-stats-panel,
-.forge-upgrades-panel {
-    transition:
-        border-color 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-/* ========== SURVOL DES PANNEAUX RPG ========== */
-
-.forge-stats-panel:hover {
-    border-color: rgba(170, 190, 220, 0.65);
-
-    box-shadow:
-        inset 0 0 25px rgba(0, 0, 0, 0.4),
-        0 0 22px rgba(120, 150, 190, 0.15);
-}
-
-.forge-upgrades-panel:hover {
-    border-color: rgba(255, 180, 85, 0.7);
-
-    box-shadow:
-        inset 0 0 25px rgba(0, 0, 0, 0.4),
-        0 0 22px rgba(255, 140, 45, 0.18);
-}
-
-/* ========== ORNEMENTS DES TITRES RPG ========== */
-
-.forge-stats-panel h2::before,
-.forge-upgrades-panel h2::before {
-    content: "◆";
-    margin-right: 12px;
-
-    color: #b88a50;
-    font-size: 0.65rem;
-    vertical-align: middle;
-}
-
-.forge-stats-panel h2::after,
-.forge-upgrades-panel h2::after {
-    content: "◆";
-    margin-left: 12px;
-
-    color: #b88a50;
-    font-size: 0.65rem;
-    vertical-align: middle;
-}
-
-/* ========== ORNEMENT DU TITRE PRINCIPAL ========== */
-
-.forge-header h1::after {
-    content: "";
-    display: block;
-
-    width: 180px;
-    height: 2px;
-    margin: 16px auto 0;
-
-    background: linear-gradient(90deg, transparent, #d6a35e, transparent);
-
-    box-shadow: 0 0 12px rgba(255, 180, 70, 0.25);
-}
-
-/* ========== LUEUR DU TITRE RELIC FORGE ========== */
-
-.forge-header h1 {
-    animation: forge-title-glow 5s ease-in-out infinite;
-}
-
-@keyframes forge-title-glow {
-    0%,
-    100% {
-        text-shadow:
-            0 0 10px rgba(255, 180, 70, 0.2),
-            0 3px 5px rgba(0, 0, 0, 0.8);
-    }
-
-    50% {
-        text-shadow:
-            0 0 20px rgba(255, 180, 70, 0.5),
-            0 0 35px rgba(255, 120, 30, 0.2),
-            0 3px 5px rgba(0, 0, 0, 0.8);
-    }
-}
-
-/* ========== OUTIL DE DÉVELOPPEMENT ========== */
+/* =========================================================
+   14. OUTIL DE DÉVELOPPEMENT
+   ========================================================= */
 
 .forge-dev-reset {
     position: fixed;
