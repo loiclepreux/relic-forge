@@ -20,7 +20,7 @@ import {
 } from "./game/forgeActions";
 import "./App.css";
 
-function loadInitialForgeV2() {
+function loadInitialForge() {
     const result = loadForgeState();
     const autoSaveAllowed = canAutoSave(result.status);
 
@@ -78,7 +78,7 @@ const formatEchoes = (milli: number) =>
     });
 
 function App() {
-    const [initialData] = useState(loadInitialForgeV2);
+    const [initialData] = useState(loadInitialForge);
     const [forge, setForge] = useState(initialData.forge);
     const forgeRef = useRef(forge);
     const strikeWindowRef = useRef<StrikeWindow>({ startedAt: 0, count: 0 });

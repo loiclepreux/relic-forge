@@ -155,10 +155,10 @@ export function loadForgeState(
     storage: Pick<Storage, "getItem"> = localStorage,
 ): ForgeLoadResult {
     try {
-        const savedForgeV2 = storage.getItem(SAVE_KEY);
+        const savedForge = storage.getItem(SAVE_KEY);
 
-        if (savedForgeV2 !== null) {
-            const parsedV2: unknown = JSON.parse(savedForgeV2);
+        if (savedForge !== null) {
+            const parsedV2: unknown = JSON.parse(savedForge);
 
             if (!isForgeSave(parsedV2)) {
                 console.error("Sauvegarde V2 invalide.");
