@@ -1,28 +1,28 @@
-import type { ForgeState, ForgeStateV2 } from "./forgeState";
-import { migrateForgeStateV1ToV2 } from "./forgeState";
+import type { LegacyForgeStateV1, ForgeState } from "./forgeState";
+import { migrateForgeStateFromV1 } from "./forgeState";
 
-const FORGE_SAVE_KEY = "relic-forge-save";
-const FORGE_SAVE_KEY_V2 = "relic-forge-save-v2";
+const SAVE_KEY_V1 = "relic-forge-save";
+const SAVE_KEY = "relic-forge-save-v2";
+
+type LegacyForgeSaveV1 = {
+    forge: LegacyForgeStateV1;
+    savedAt: number;
+};
 
 type ForgeSave = {
     forge: ForgeState;
     savedAt: number;
 };
 
-type ForgeSaveV2 = {
-    forge: ForgeStateV2;
-    savedAt: number;
-};
-
-export type LoadedForgeSaveV2 = {
-    forge: ForgeStateV2;
+export type LoadedForgeSave = {
+    forge: ForgeState;
     savedAt: number;
 };
 
 export type ForgeLoadResult =
     | {
           status: "loaded";
-          data: LoadedForgeSaveV2;
+          data: LoadedForgeSave;
       }
     | {
           status: "missing";
@@ -35,7 +35,7 @@ export function canAutoSave(loadStatus: ForgeLoadResult["status"]): boolean {
     return loadStatus === "loaded" || loadStatus === "missing";
 }
 
-export function isForgeStateV2(value: unknown): value is ForgeStateV2 {
+export function isForgeState(value: unknown): value is ForgeState {
     if (typeof value !== "object" || value === null) {
         return false;
     }
@@ -74,7 +74,7 @@ export function isForgeStateV2(value: unknown): value is ForgeStateV2 {
     );
 }
 
-function isForgeState(value: unknown): value is ForgeState {
+function isLegacyForgeStateV1(value: unknown): value is LegacyForgeStateV1 {
     if (typeof value !== "object" || value === null) {
         return false;
     }
@@ -91,14 +91,14 @@ function isForgeState(value: unknown): value is ForgeState {
     );
 }
 
-export function isForgeSaveV2(value: unknown): value is ForgeSaveV2 {
+export function isForgeSave(value: unknown): value is ForgeSave {
     if (typeof value !== "object" || value === null) {
         return false;
     }
 
     const save = value as Record<string, unknown>;
 
-    if (!isForgeStateV2(save.forge)) {
+    if (!isForgeState(save.forge)) {
         return false;
     }
 
@@ -113,7 +113,7 @@ export function isForgeSaveV2(value: unknown): value is ForgeSaveV2 {
     return save.forge.lastProductionAt <= save.savedAt;
 }
 
-function isForgeSave(value: unknown): value is ForgeSave {
+function isLegacyForgeSaveV1(value: unknown): value is LegacyForgeSaveV1 {
     if (typeof value !== "object" || value === null) {
         return false;
     }
@@ -121,7 +121,7 @@ function isForgeSave(value: unknown): value is ForgeSave {
     const save = value as Record<string, unknown>;
 
     return (
-        isForgeState(save.forge) &&
+        isLegacyForgeStateV1(save.forge) &&
         typeof save.savedAt === "number" &&
         Number.isFinite(save.savedAt) &&
         save.savedAt >= 0
@@ -129,23 +129,23 @@ function isForgeSave(value: unknown): value is ForgeSave {
 }
 
 export function saveForgeState(
-    forge: ForgeStateV2,
+    forge: ForgeState,
     storage: Pick<Storage, "setItem"> = localStorage,
 ): void {
-    const save: ForgeSaveV2 = {
+    const save: ForgeSave = {
         forge,
         savedAt: Date.now(),
     };
 
     // Vérifier la cohérence de la sauvegarde complète.
-    if (!isForgeSaveV2(save)) {
+    if (!isForgeSave(save)) {
         console.error("Sauvegarde V2 refusée : données ou dates invalides.");
         return;
     }
 
     // Protéger l'écriture contre les erreurs de stockage.
     try {
-        storage.setItem(FORGE_SAVE_KEY_V2, JSON.stringify(save));
+        storage.setItem(SAVE_KEY, JSON.stringify(save));
     } catch (error) {
         console.error("Impossible d'enregistrer la sauvegarde V2 :", error);
     }
@@ -155,12 +155,12 @@ export function loadForgeState(
     storage: Pick<Storage, "getItem"> = localStorage,
 ): ForgeLoadResult {
     try {
-        const savedForgeV2 = storage.getItem(FORGE_SAVE_KEY_V2);
+        const savedForgeV2 = storage.getItem(SAVE_KEY);
 
         if (savedForgeV2 !== null) {
             const parsedV2: unknown = JSON.parse(savedForgeV2);
 
-            if (!isForgeSaveV2(parsedV2)) {
+            if (!isForgeSave(parsedV2)) {
                 console.error("Sauvegarde V2 invalide.");
                 return { status: "error" };
             }
@@ -174,7 +174,7 @@ export function loadForgeState(
             };
         }
 
-        const savedForgeV1 = storage.getItem(FORGE_SAVE_KEY);
+        const savedForgeV1 = storage.getItem(SAVE_KEY_V1);
 
         if (savedForgeV1 === null) {
             return { status: "missing" };
@@ -182,17 +182,17 @@ export function loadForgeState(
 
         const parsedV1: unknown = JSON.parse(savedForgeV1);
 
-        if (!isForgeSave(parsedV1)) {
+        if (!isLegacyForgeSaveV1(parsedV1)) {
             console.error("Sauvegarde V1 invalide.");
             return { status: "error" };
         }
 
-        const migratedForge = migrateForgeStateV1ToV2(
+        const migratedForge = migrateForgeStateFromV1(
             parsedV1.forge,
             parsedV1.savedAt,
         );
 
-        if (!isForgeStateV2(migratedForge)) {
+        if (!isForgeState(migratedForge)) {
             console.error("Migration V1 vers V2 invalide.");
             return { status: "error" };
         }

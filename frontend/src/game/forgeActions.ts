@@ -1,4 +1,4 @@
-import { createInitialForgeStateV2, type ForgeStateV2 } from "./forgeState";
+import { createInitialForgeState, type ForgeState } from "./forgeState";
 import {
     calculateForgeUpgradeCostMilli,
     calculateStrikeGainMilli,
@@ -45,7 +45,7 @@ export function checkStrikeLimit(
     };
 }
 
-function applyUpgrade(forge: ForgeStateV2): ForgeStateV2 {
+function applyUpgrade(forge: ForgeState): ForgeState {
     const upgradeCostMilli = calculateForgeUpgradeCostMilli(forge.forgeForce);
 
     // Vérifier que le solde, le niveau et le coût sont valides.
@@ -74,13 +74,13 @@ function applyUpgrade(forge: ForgeStateV2): ForgeStateV2 {
 }
 
 function applyStrike(
-    forge: ForgeStateV2,
+    forge: ForgeState,
     strikeWindow: StrikeWindow,
     now: number,
     baseStrikeGain: number = 1,
     multiplier: number = 1,
 ): {
-    forge: ForgeStateV2;
+    forge: ForgeState;
     gainMilli: number;
     strikeWindow: StrikeWindow;
 } {
@@ -127,10 +127,7 @@ function applyStrike(
     };
 }
 
-export function accrueProduction(
-    forge: ForgeStateV2,
-    now: number,
-): ForgeStateV2 {
+export function accrueProduction(forge: ForgeState, now: number): ForgeState {
     const elapsedMilliseconds = Math.max(0, now - forge.lastProductionAt);
 
     const passiveProduction = calculateProducerProduction(forge.producers);
@@ -164,11 +161,11 @@ export function accrueProduction(
     };
 }
 
-export function resetForge(now: number = Date.now()): ForgeStateV2 {
-    return createInitialForgeStateV2(now);
+export function resetForge(now: number = Date.now()): ForgeState {
+    return createInitialForgeState(now);
 }
 
-function applyBuyAwakenedEmber(forge: ForgeStateV2): ForgeStateV2 {
+function applyBuyAwakenedEmber(forge: ForgeState): ForgeState {
     // Condition provisoire : Force de Forge 2.
     // À remplacer par le niveau du joueur lorsque ce système existera.
     if (forge.forgeForce < 2) {
@@ -210,31 +207,31 @@ function applyBuyAwakenedEmber(forge: ForgeStateV2): ForgeStateV2 {
 }
 
 export function buyAwakenedEmber(
-    forge: ForgeStateV2,
+    forge: ForgeState,
     now: number = Date.now(),
-): ForgeStateV2 {
+): ForgeState {
     const updatedForge = accrueProduction(forge, now);
 
     return applyBuyAwakenedEmber(updatedForge);
 }
 
 export function upgradeForge(
-    forge: ForgeStateV2,
+    forge: ForgeState,
     now: number = Date.now(),
-): ForgeStateV2 {
+): ForgeState {
     const updatedForge = accrueProduction(forge, now);
 
     return applyUpgrade(updatedForge);
 }
 
 export function strikeForge(
-    forge: ForgeStateV2,
+    forge: ForgeState,
     strikeWindow: StrikeWindow,
     now: number,
     baseStrikeGain: number = 1,
     multiplier: number = 1,
 ): {
-    forge: ForgeStateV2;
+    forge: ForgeState;
     gainMilli: number;
     strikeWindow: StrikeWindow;
 } {

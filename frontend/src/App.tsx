@@ -8,7 +8,7 @@ import {
     getForgeStage,
     getForgeStageName,
 } from "./game/forgeEconomy";
-import { createInitialForgeStateV2 } from "./game/forgeState";
+import { createInitialForgeState } from "./game/forgeState";
 import { loadForgeState, canAutoSave, saveForgeState } from "./game/forgeSave";
 import type { StrikeWindow } from "./game/forgeActions";
 import {
@@ -64,7 +64,7 @@ function loadInitialForgeV2() {
     }
 
     return {
-        forge: createInitialForgeStateV2(),
+        forge: createInitialForgeState(),
         autoSaveAllowed,
         loadError: result.status !== "missing",
         offlineGainMilli: 0,

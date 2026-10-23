@@ -4,7 +4,7 @@ export type ForgeProducers = {
     awakenedEmber: number;
 };
 
-export type ForgeStateV2 = {
+export type ForgeState = {
     version: 2;
     echoesMilli: number;
     forgeForce: number;
@@ -13,19 +13,12 @@ export type ForgeStateV2 = {
     productionRemainderMilli: number;
 };
 
-export type ForgeState = {
+export type LegacyForgeStateV1 = {
     echoes: number;
     forgeForce: number;
 };
 
-export const initialForgeState: ForgeState = {
-    echoes: 0,
-    forgeForce: 0,
-};
-
-export function createInitialForgeStateV2(
-    now: number = Date.now(),
-): ForgeStateV2 {
+export function createInitialForgeState(now: number = Date.now()): ForgeState {
     return {
         version: 2,
         echoesMilli: 0,
@@ -38,10 +31,10 @@ export function createInitialForgeStateV2(
     };
 }
 
-export function migrateForgeStateV1ToV2(
-    oldForge: ForgeState,
+export function migrateForgeStateFromV1(
+    oldForge: LegacyForgeStateV1,
     savedAt: number,
-): ForgeStateV2 {
+): ForgeState {
     return {
         version: 2,
         echoesMilli: echoesToMilli(oldForge.echoes),
