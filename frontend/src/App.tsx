@@ -207,6 +207,7 @@ function App() {
         forgeRef.current = fresh;
         strikeWindowRef.current = { startedAt: 0, count: 0 };
         setForge(fresh);
+        saveForgeState(fresh);
     }
 
     return (
@@ -336,7 +337,7 @@ function App() {
                     </div>
                     <button
                         type="button"
-                        className={canUpgrade ? "forge-upgrade-ready" : ""}
+                        className={`forge-upgrade-button ${canUpgrade ? "forge-upgrade-ready" : ""}`}
                         onClick={handleUpgrade}
                         disabled={!canUpgrade}
                     >

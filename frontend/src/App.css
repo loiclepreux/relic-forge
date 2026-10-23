@@ -881,9 +881,9 @@
     cursor: not-allowed;
 }
 
-/* --- Premier bouton du panneau : style bronze --- */
+/* --- Bouton « Améliorer la Forge » : style bronze --- */
 
-.forge-upgrades-panel > button:first-of-type {
+.forge-upgrades-panel > .forge-upgrade-button {
     background: linear-gradient(180deg, #69401f 0%, #382416 100%);
 
     border: 1px solid #a7773e;
@@ -894,7 +894,7 @@
         0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.forge-upgrades-panel > button:first-of-type:hover:not(:disabled) {
+.forge-upgrades-panel > .forge-upgrade-button:hover:not(:disabled) {
     background: linear-gradient(180deg, #865329 0%, #4b2e1b 100%);
 
     border-color: #e2a75b;
