@@ -16,6 +16,7 @@ import {
     upgradeForge,
     buyAwakenedEmber,
     accrueProduction,
+    resetForge,
 } from "./game/forgeActions";
 import "./App.css";
 
@@ -201,6 +202,13 @@ function App() {
         setForge(updated);
     }
 
+    function handleDevReset() {
+        const fresh = resetForge(Date.now());
+        forgeRef.current = fresh;
+        strikeWindowRef.current = { startedAt: 0, count: 0 };
+        setForge(fresh);
+    }
+
     return (
         <main className="forge-page">
             <header className="forge-header">
@@ -336,6 +344,16 @@ function App() {
                     </button>
                 </div>
             </section>
+
+            {import.meta.env.DEV && (
+                <button
+                    type="button"
+                    className="forge-dev-reset"
+                    onClick={handleDevReset}
+                >
+                    Réinitialiser (dev)
+                </button>
+            )}
         </main>
     );
 }
