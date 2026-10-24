@@ -74,6 +74,9 @@ function loadInitialForge() {
     };
 }
 
+// Pas de message « Pendant votre absence » pour moins d'1 Écho.
+const MIN_ABSENCE_MESSAGE_MILLI = 1000;
+
 const formatEchoes = (milli: number) =>
     (milli / 1000).toLocaleString("fr-FR", {
         minimumFractionDigits: 0,
@@ -89,11 +92,14 @@ function App() {
     const [showStrikeGain, setShowStrikeGain] = useState(false);
     const [lastStrikeGainMilli, setLastStrikeGainMilli] = useState(0);
     const [lastStrikeCritical, setLastStrikeCritical] = useState(false);
+    const [saveFailed, setSaveFailed] = useState(false);
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
     const [offlineGainMessage, setOfflineGainMessage] = useState<number | null>(
-        initialData.offlineGainMilli > 0 ? initialData.offlineGainMilli : null,
+        initialData.offlineGainMilli >= MIN_ABSENCE_MESSAGE_MILLI
+            ? initialData.offlineGainMilli
+            : null,
     );
 
     const blocked = initialData.loadError;
@@ -142,7 +148,7 @@ function App() {
     useEffect(() => {
         if (!initialData.autoSaveAllowed || blocked) return;
         const interval = window.setInterval(() => {
-            saveForgeState(forgeRef.current);
+            setSaveFailed(!saveForgeState(forgeRef.current));
         }, 5000);
         return () => window.clearInterval(interval);
     }, [initialData.autoSaveAllowed, blocked]);
@@ -150,7 +156,7 @@ function App() {
     useEffect(() => {
         if (!initialData.autoSaveAllowed || blocked) return;
         const save = () => {
-            saveForgeState(forgeRef.current);
+            setSaveFailed(!saveForgeState(forgeRef.current));
         };
         window.addEventListener("pagehide", save);
         return () => window.removeEventListener("pagehide", save);
@@ -171,7 +177,8 @@ function App() {
                 const updated = accrueProduction(forgeRef.current, now);
                 forgeRef.current = updated;
                 setForge(updated);
-                if (initialData.autoSaveAllowed) saveForgeState(updated);
+                if (initialData.autoSaveAllowed)
+                    setSaveFailed(!saveForgeState(updated));
                 return;
             }
 
@@ -181,8 +188,11 @@ function App() {
             const result = resumeAfterAbsence(forgeRef.current, now);
             forgeRef.current = result.forge;
             setForge(result.forge);
-            if (result.gainMilli > 0) setOfflineGainMessage(result.gainMilli);
-            if (initialData.autoSaveAllowed) saveForgeState(result.forge);
+            if (result.gainMilli >= MIN_ABSENCE_MESSAGE_MILLI) {
+                setOfflineGainMessage(result.gainMilli);
+            }
+            if (initialData.autoSaveAllowed)
+                setSaveFailed(!saveForgeState(result.forge));
         };
 
         document.addEventListener("visibilitychange", onVisibilityChange);
@@ -241,7 +251,7 @@ function App() {
         forgeRef.current = fresh;
         strikeWindowRef.current = { startedAt: 0, count: 0 };
         setForge(fresh);
-        saveForgeState(fresh);
+        setSaveFailed(!saveForgeState(fresh));
     }
 
     return (
@@ -255,6 +265,14 @@ function App() {
                 <p role="alert" className="forge-offline-message">
                     Impossible de charger la sauvegarde en toute sécurité. La
                     Forge est bloquée pour éviter d'écraser ta progression.
+                </p>
+            )}
+
+            {saveFailed && (
+                <p role="alert" className="forge-offline-message">
+                    ⚠️ Sauvegarde impossible : ta progression ne sera pas
+                    conservée si tu fermes la page. Vérifie que ton navigateur
+                    autorise le stockage local pour ce site.
                 </p>
             )}
 
@@ -359,6 +377,7 @@ function App() {
                             </p>
                             <button
                                 type="button"
+                                className="forge-ember-button"
                                 onClick={handleBuyEmber}
                                 disabled={!canBuyEmber}
                             >

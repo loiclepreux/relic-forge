@@ -128,10 +128,11 @@ function isLegacyForgeSaveV1(value: unknown): value is LegacyForgeSaveV1 {
     );
 }
 
+/** Enregistre la Forge. Renvoie false si la sauvegarde a échoué. */
 export function saveForgeState(
     forge: ForgeState,
     storage: Pick<Storage, "setItem"> = localStorage,
-): void {
+): boolean {
     const save: ForgeSave = {
         forge,
         savedAt: Date.now(),
@@ -140,14 +141,16 @@ export function saveForgeState(
     // Vérifier la cohérence de la sauvegarde complète.
     if (!isForgeSave(save)) {
         console.error("Sauvegarde V2 refusée : données ou dates invalides.");
-        return;
+        return false;
     }
 
     // Protéger l'écriture contre les erreurs de stockage.
     try {
         storage.setItem(SAVE_KEY, JSON.stringify(save));
+        return true;
     } catch (error) {
         console.error("Impossible d'enregistrer la sauvegarde V2 :", error);
+        return false;
     }
 }
 

@@ -149,11 +149,12 @@ describe("sauvegarde", () => {
 
         const store: Record<string, string> = {};
         const forge = createInitialForgeState(1000);
-        saveForgeState(forge, {
+        const ok = saveForgeState(forge, {
             setItem: (key, value) => {
                 store[key] = value;
             },
         });
+        expect(ok).toBe(true);
 
         expect(Object.keys(store)).toEqual([SAVE_KEY]);
         expect(loadForgeState(storageWith(store))).toEqual({
@@ -165,18 +166,16 @@ describe("sauvegarde", () => {
     it("refuse d'écrire un état invalide", () => {
         const setItem = vi.fn();
         const forge = { ...createInitialForgeState(1000), echoesMilli: NaN };
-        saveForgeState(forge, { setItem });
+        expect(saveForgeState(forge, { setItem })).toBe(false);
         expect(setItem).not.toHaveBeenCalled();
     });
 
-    it("ne plante pas si le stockage est plein", () => {
+    it("signale l'échec sans planter si le stockage est plein", () => {
         const full = {
             setItem: () => {
                 throw new Error("QuotaExceededError");
             },
         };
-        expect(() =>
-            saveForgeState(createInitialForgeState(1000), full),
-        ).not.toThrow();
+        expect(saveForgeState(createInitialForgeState(1000), full)).toBe(false);
     });
 });
