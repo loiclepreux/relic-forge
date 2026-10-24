@@ -7,6 +7,8 @@ import {
     calculateOfflineGainMilli,
     getForgeStage,
     getForgeStageName,
+    CRITICAL_CHANCE,
+    CRITICAL_MULTIPLIER,
 } from "./game/forgeEconomy";
 import { createInitialForgeState } from "./game/forgeState";
 import { loadForgeState, canAutoSave, saveForgeState } from "./game/forgeSave";
@@ -17,6 +19,7 @@ import {
     buyAwakenedEmber,
     accrueProduction,
     resetForge,
+    resumeAfterAbsence,
 } from "./game/forgeActions";
 import "./App.css";
 
@@ -85,6 +88,7 @@ function App() {
     const [isStriking, setIsStriking] = useState(false);
     const [showStrikeGain, setShowStrikeGain] = useState(false);
     const [lastStrikeGainMilli, setLastStrikeGainMilli] = useState(0);
+    const [lastStrikeCritical, setLastStrikeCritical] = useState(false);
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
@@ -126,6 +130,8 @@ function App() {
     useEffect(() => {
         if (blocked) return;
         const interval = window.setInterval(() => {
+            // Onglet caché = hors ligne (V9) : pas de production à 100 %.
+            if (document.visibilityState === "hidden") return;
             const updated = accrueProduction(forgeRef.current, Date.now());
             forgeRef.current = updated;
             setForge(updated);
@@ -146,18 +152,45 @@ function App() {
         const save = () => {
             saveForgeState(forgeRef.current);
         };
-        const onVisibilityChange = () => {
-            if (document.visibilityState === "hidden") save();
-        };
         window.addEventListener("pagehide", save);
+        return () => window.removeEventListener("pagehide", save);
+    }, [initialData.autoSaveAllowed, blocked]);
+
+    // Onglet caché = hors ligne (V9, option B).
+    // En partant : on verse la production en ligne jusqu'à maintenant.
+    // En revenant : le temps caché est payé comme du hors-ligne (50 %, 8 h max).
+    useEffect(() => {
+        if (blocked) return;
+        let wasHidden = document.visibilityState === "hidden";
+
+        const onVisibilityChange = () => {
+            const now = Date.now();
+
+            if (document.visibilityState === "hidden") {
+                wasHidden = true;
+                const updated = accrueProduction(forgeRef.current, now);
+                forgeRef.current = updated;
+                setForge(updated);
+                if (initialData.autoSaveAllowed) saveForgeState(updated);
+                return;
+            }
+
+            if (!wasHidden) return;
+            wasHidden = false;
+
+            const result = resumeAfterAbsence(forgeRef.current, now);
+            forgeRef.current = result.forge;
+            setForge(result.forge);
+            if (result.gainMilli > 0) setOfflineGainMessage(result.gainMilli);
+            if (initialData.autoSaveAllowed) saveForgeState(result.forge);
+        };
+
         document.addEventListener("visibilitychange", onVisibilityChange);
-        return () => {
-            window.removeEventListener("pagehide", save);
+        return () =>
             document.removeEventListener(
                 "visibilitychange",
                 onVisibilityChange,
             );
-        };
     }, [initialData.autoSaveAllowed, blocked]);
 
     function handleStrike() {
@@ -172,6 +205,7 @@ function App() {
         forgeRef.current = result.forge;
         setForge(result.forge);
         setLastStrikeGainMilli(result.gainMilli);
+        setLastStrikeCritical(result.isCritical);
         setIsStriking(true);
         setShowStrikeGain(true);
         const ringId = ++impactRingIdRef.current;
@@ -244,6 +278,10 @@ function App() {
                         })}{" "}
                         Écho/s
                     </p>
+                    <p>
+                        Coup critique : {CRITICAL_CHANCE * 100} % (×
+                        {CRITICAL_MULTIPLIER})
+                    </p>
                 </div>
 
                 <div className="forge-center-panel">
@@ -288,8 +326,11 @@ function App() {
                         </div>
                     )}
                     {showStrikeGain && (
-                        <span className="strike-gain">
-                            +{formatEchoes(lastStrikeGainMilli)} Échos
+                        <span
+                            className={`strike-gain ${lastStrikeCritical ? "strike-gain-critical" : ""}`}
+                        >
+                            {lastStrikeCritical && "CRITIQUE ! "}+
+                            {formatEchoes(lastStrikeGainMilli)} Échos
                         </span>
                     )}
                     {showUpgradeFeedback && (

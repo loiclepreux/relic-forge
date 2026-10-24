@@ -1,5 +1,16 @@
 import type { ForgeProducers } from "./forgeState";
 
+// Coup critique (V9, provisoire) : 10 % de chance, gain de la frappe ×2.
+export const CRITICAL_CHANCE = 0.1;
+export const CRITICAL_MULTIPLIER = 2;
+
+/** Tire au sort un coup critique. `random` est remplaçable dans les tests. */
+export function rollCriticalStrike(
+    random: () => number = Math.random,
+): boolean {
+    return random() < CRITICAL_CHANCE;
+}
+
 export function echoesToMilli(echoes: number): number {
     // Refuser les valeurs négatives ou non finies.
     if (!Number.isFinite(echoes) || echoes < 0) {

@@ -5,11 +5,21 @@ import {
     calculateProducerProduction,
     calculateAwakenedEmberCostMilli,
     calculateElapsedProductionWithRemainder,
+    calculateOfflineGainMilli,
+    rollCriticalStrike,
+    CRITICAL_MULTIPLIER,
 } from "./forgeEconomy";
 
 export type StrikeWindow = {
     startedAt: number;
     count: number;
+};
+
+export type StrikeResult = {
+    forge: ForgeState;
+    gainMilli: number;
+    strikeWindow: StrikeWindow;
+    isCritical: boolean;
 };
 
 export function checkStrikeLimit(
@@ -77,13 +87,10 @@ function applyStrike(
     forge: ForgeState,
     strikeWindow: StrikeWindow,
     now: number,
+    random: () => number,
     baseStrikeGain: number = 1,
     multiplier: number = 1,
-): {
-    forge: ForgeState;
-    gainMilli: number;
-    strikeWindow: StrikeWindow;
-} {
+): StrikeResult {
     const strikeCheck = checkStrikeLimit(strikeWindow, now);
 
     if (!strikeCheck.allowed) {
@@ -91,16 +98,21 @@ function applyStrike(
             forge,
             gainMilli: 0,
             strikeWindow: strikeCheck.strikeWindow,
+            isCritical: false,
         };
     }
 
     const passiveProduction = calculateProducerProduction(forge.producers);
 
+    // Le critique ne se tire que pour une frappe comptée (limite de 5/s).
+    const isCritical = rollCriticalStrike(random);
+    const criticalMultiplier = isCritical ? CRITICAL_MULTIPLIER : 1;
+
     const gainMilli = calculateStrikeGainMilli(
         baseStrikeGain,
         forge.forgeForce,
         passiveProduction,
-        multiplier,
+        multiplier * criticalMultiplier,
     );
 
     // Empêcher un dépassement du solde maximal sûr.
@@ -114,6 +126,7 @@ function applyStrike(
             forge,
             gainMilli: 0,
             strikeWindow: strikeCheck.strikeWindow,
+            isCritical: false,
         };
     }
 
@@ -124,6 +137,7 @@ function applyStrike(
         },
         gainMilli,
         strikeWindow: strikeCheck.strikeWindow,
+        isCritical,
     };
 }
 
@@ -228,20 +242,56 @@ export function strikeForge(
     forge: ForgeState,
     strikeWindow: StrikeWindow,
     now: number,
+    random: () => number = Math.random,
     baseStrikeGain: number = 1,
     multiplier: number = 1,
-): {
-    forge: ForgeState;
-    gainMilli: number;
-    strikeWindow: StrikeWindow;
-} {
+): StrikeResult {
     const updatedForge = accrueProduction(forge, now);
 
     return applyStrike(
         updatedForge,
         strikeWindow,
         now,
+        random,
         baseStrikeGain,
         multiplier,
     );
+}
+
+/**
+ * Retour après une absence (onglet caché, V9 option B) :
+ * le temps écoulé depuis `lastProductionAt` est payé comme du hors-ligne
+ * (50 %, 8 h maximum). Le reste de production en cours est abandonné.
+ */
+export function resumeAfterAbsence(
+    forge: ForgeState,
+    now: number,
+): {
+    forge: ForgeState;
+    gainMilli: number;
+} {
+    // Horloge revenue en arrière : aucun gain, on ne recule pas la date.
+    if (now <= forge.lastProductionAt) {
+        return { forge, gainMilli: 0 };
+    }
+
+    const gainMilli = calculateOfflineGainMilli(
+        calculateProducerProduction(forge.producers),
+        now - forge.lastProductionAt,
+    );
+
+    const gainIsSafe =
+        Number.isSafeInteger(forge.echoesMilli) &&
+        forge.echoesMilli >= 0 &&
+        gainMilli <= Number.MAX_SAFE_INTEGER - forge.echoesMilli;
+
+    return {
+        forge: {
+            ...forge,
+            echoesMilli: forge.echoesMilli + (gainIsSafe ? gainMilli : 0),
+            productionRemainderMilli: 0,
+            lastProductionAt: now,
+        },
+        gainMilli: gainIsSafe ? gainMilli : 0,
+    };
 }

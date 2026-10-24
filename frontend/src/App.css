@@ -821,6 +821,19 @@
     }
 }
 
+/* --- Frappe critique : plus grosse, plus lumineuse --- */
+
+.strike-gain-critical {
+    color: #ff8a3d;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    text-shadow:
+        0 0 10px rgba(255, 120, 40, 0.8),
+        0 0 22px rgba(255, 60, 0, 0.45);
+}
+
 /* =========================================================
    11. PANNEAU AMÉLIORATIONS (braises)
    ========================================================= */
