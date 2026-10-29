@@ -69,6 +69,8 @@ export function calculateAwakenedEmberCostMilli(owned: number): number {
     return costEchoes * 1000;
 }
 
+// Stades calqués sur les tranches de niveaux de la Bible (24.3) :
+// 0–10 Endormie, 11–25 Éveillée, 26–40 Ancestrale, 41–50 Transcendante.
 export function getForgeStage(forgeForce: number): number {
     if (forgeForce >= 41) {
         return 4;
