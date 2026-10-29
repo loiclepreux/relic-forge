@@ -1,0 +1,103 @@
+// Schéma de la base de données (Bible 23.9 : schéma minimal du P01).
+// Après toute modification : pnpm --filter @relic-forge/api db:migrate
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Ressources économiques (pour l'instant, seulement les Échos).
+enum ResourceType {
+  ECHOES
+}
+
+/// Améliorations de la Forge.
+enum UpgradeKey {
+  STRIKE_POWER   // Force de Forge
+  AWAKENED_EMBER // Braises éveillées
+}
+
+/// Un joueur.
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  forge        ForgeState?
+  balances     ResourceBalance[]
+  transactions EconomyTransaction[]
+}
+
+/// État de la Forge d'un joueur.
+model ForgeState {
+  id                       String    @id @default(uuid())
+  userId                   String    @unique
+  lastProductionAt         DateTime  @default(now())
+  /// Fraction de milli-Écho en attente (entre 0 et 1).
+  productionRemainderMilli Float     @default(0)
+  /// Fenêtre de 1 seconde pour la limite de 5 frappes (13.2).
+  strikeWindowStartedAt    DateTime?
+  strikeWindowCount        Int       @default(0)
+  /// Verrou optimiste : augmente à chaque modification.
+  version                  Int       @default(0)
+  updatedAt                DateTime  @updatedAt
+
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upgrades PlayerForgeUpgrade[]
+}
+
+/// Niveau de chaque amélioration achetée.
+model PlayerForgeUpgrade {
+  id           String     @id @default(uuid())
+  forgeStateId String
+  upgradeKey   UpgradeKey
+  level        Int        @default(0)
+
+  forge ForgeState @relation(fields: [forgeStateId], references: [id], onDelete: Cascade)
+
+  @@unique([forgeStateId, upgradeKey])
+}
+
+/// Solde d'une ressource, en milli-unités (1 Écho = 1000).
+model ResourceBalance {
+  id          String       @id @default(uuid())
+  userId      String
+  resource    ResourceType
+  amountMilli BigInt       @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resource])
+}
+
+/// Une opération économique (frappe, achat…). requestId empêche
+/// de traiter deux fois la même demande.
+model EconomyTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  requestId String
+  kind      String
+  createdAt DateTime @default(now())
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries EconomyEntry[]
+
+  @@unique([userId, requestId])
+}
+
+/// Mouvement d'une ressource au sein d'une opération.
+model EconomyEntry {
+  id                String       @id @default(uuid())
+  transactionId     String
+  resource          ResourceType
+  deltaMilli        BigInt
+  balanceAfterMilli BigInt
+
+  transaction EconomyTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
