@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "dev": "pnpm --filter @relic-forge/web dev",
+        "dev:api": "pnpm --filter @relic-forge/api dev",
         "build": "pnpm -r build",
         "lint": "pnpm -r lint",
         "test": "pnpm -r test",
