@@ -5,7 +5,7 @@ import {
     loadForgeState,
     saveForgeState,
 } from "./forgeSave";
-import { createInitialForgeState } from "./forgeState";
+import { createInitialForgeState } from "@relic-forge/game-engine";
 
 // Les mêmes clés que dans forgeSave.ts : si ces tests cassent après
 // une modification des clés, c'est que les anciennes sauvegardes seraient perdues.

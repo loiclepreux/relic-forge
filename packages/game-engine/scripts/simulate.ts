@@ -7,7 +7,7 @@ import {
     simulate,
     simulateDailyLife,
     type SimulationResult,
-} from "../src/game/forgeSimulator";
+} from "../src/forgeSimulator";
 
 const SEED = 42;
 

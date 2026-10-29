@@ -1,0 +1,12 @@
+{
+    "name": "relic-forge",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "pnpm --filter @relic-forge/web dev",
+        "build": "pnpm -r build",
+        "lint": "pnpm -r lint",
+        "test": "pnpm -r test",
+        "simulate": "pnpm --filter @relic-forge/game-engine simulate"
+    }
+}

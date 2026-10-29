@@ -1,5 +1,8 @@
-import type { LegacyForgeStateV1, ForgeState } from "./forgeState";
-import { migrateForgeStateFromV1 } from "./forgeState";
+import {
+    migrateForgeStateFromV1,
+    type ForgeState,
+    type LegacyForgeStateV1,
+} from "@relic-forge/game-engine";
 
 const SAVE_KEY_V1 = "relic-forge-save";
 const SAVE_KEY = "relic-forge-save-v2";

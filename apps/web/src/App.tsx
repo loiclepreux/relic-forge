@@ -1,26 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import {
-    calculateForgeUpgradeCostMilli,
-    calculateProducerProduction,
-    calculateAwakenedEmberCostMilli,
-    calculateStrikeGainMilli,
-    calculateOfflineGainMilli,
-    getForgeStage,
-    getForgeStageName,
     CRITICAL_CHANCE,
     CRITICAL_MULTIPLIER,
-} from "./game/forgeEconomy";
-import { createInitialForgeState } from "./game/forgeState";
-import { loadForgeState, canAutoSave, saveForgeState } from "./game/forgeSave";
-import type { StrikeWindow } from "./game/forgeActions";
-import {
-    strikeForge,
-    upgradeForge,
-    buyAwakenedEmber,
     accrueProduction,
+    buyAwakenedEmber,
+    calculateAwakenedEmberCostMilli,
+    calculateForgeUpgradeCostMilli,
+    calculateOfflineGainMilli,
+    calculateProducerProduction,
+    calculateStrikeGainMilli,
+    createInitialForgeState,
+    getForgeStage,
+    getForgeStageName,
     resetForge,
     resumeAfterAbsence,
-} from "./game/forgeActions";
+    strikeForge,
+    upgradeForge,
+    type StrikeWindow,
+} from "@relic-forge/game-engine";
+import { loadForgeState, canAutoSave, saveForgeState } from "./game/forgeSave";
 import "./App.css";
 
 function loadInitialForge() {
