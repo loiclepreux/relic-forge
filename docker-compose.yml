@@ -1,0 +1,22 @@
+# Base de données de développement (PostgreSQL).
+# Ces identifiants ne servent qu'en local : ne jamais les réutiliser en production.
+services:
+  postgres:
+    image: postgres:17
+    container_name: relic-forge-db
+    environment:
+      POSTGRES_USER: relicforge
+      POSTGRES_PASSWORD: relicforge_dev
+      POSTGRES_DB: relicforge
+    ports:
+      - "5433:5432"
+    volumes:
+      - relic-forge-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relicforge -d relicforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  relic-forge-db:
