@@ -110,19 +110,19 @@ describe("production passive par horodatage", () => {
 
 describe("amélioration de la Forge", () => {
     it("débite le coût et augmente la Force", () => {
-        const r = upgradeForge(forgeWith({ echoesMilli: 30_000 }), 1000);
+        const r = upgradeForge(forgeWith({ echoesMilli: 150_000 }), 1000);
         expect(r.forgeForce).toBe(1);
-        expect(r.echoesMilli).toBe(5000);
+        expect(r.echoesMilli).toBe(30_000);
     });
 
     it("refuse si le solde est insuffisant", () => {
-        const forge = forgeWith({ echoesMilli: 24_999 });
+        const forge = forgeWith({ echoesMilli: 119_999 });
         expect(upgradeForge(forge, 1000)).toEqual(forge);
     });
 
     it("compte la production écoulée avant l'achat", () => {
         const forge = forgeWith({
-            echoesMilli: 20_000,
+            echoesMilli: 115_000,
             producers: { awakenedEmber: 1 },
         });
         expect(upgradeForge(forge, 6000).forgeForce).toBe(1);
@@ -131,6 +131,14 @@ describe("amélioration de la Forge", () => {
     it("refuse un solde invalide", () => {
         const forge = forgeWith({ echoesMilli: NaN });
         expect(upgradeForge(forge, 1000).forgeForce).toBe(0);
+    });
+
+    it("s'arrête à Force 50", () => {
+        const forge = forgeWith({
+            echoesMilli: Number.MAX_SAFE_INTEGER - 1_000_000,
+            forgeForce: 50,
+        });
+        expect(upgradeForge(forge, 1000).forgeForce).toBe(50);
     });
 });
 
@@ -141,10 +149,10 @@ describe("achat de Braise éveillée", () => {
     });
 
     it("débite le coût et ajoute une Braise", () => {
-        const forge = forgeWith({ echoesMilli: 20_000, forgeForce: 2 });
+        const forge = forgeWith({ echoesMilli: 250_000, forgeForce: 2 });
         const r = buyAwakenedEmber(forge, 1000);
         expect(r.producers.awakenedEmber).toBe(1);
-        expect(r.echoesMilli).toBe(5000);
+        expect(r.echoesMilli).toBe(50_000);
     });
 
     it("refuse un nombre de Braises invalide", () => {

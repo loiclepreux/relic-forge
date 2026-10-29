@@ -6,6 +6,7 @@ import {
     calculateAwakenedEmberCostMilli,
     calculateElapsedProductionWithRemainder,
     calculateOfflineGainMilli,
+    MAX_FORGE_FORCE,
     rollCriticalStrike,
     CRITICAL_MULTIPLIER,
 } from "./forgeEconomy";
@@ -64,7 +65,7 @@ function applyUpgrade(forge: ForgeState): ForgeState {
         forge.echoesMilli < 0 ||
         !Number.isSafeInteger(forge.forgeForce) ||
         forge.forgeForce < 0 ||
-        forge.forgeForce >= Number.MAX_SAFE_INTEGER ||
+        forge.forgeForce >= MAX_FORGE_FORCE ||
         !Number.isSafeInteger(upgradeCostMilli) ||
         upgradeCostMilli < 0
     ) {

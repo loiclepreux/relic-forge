@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createSeededRandom, simulate } from "./forgeSimulator";
+import {
+    createSeededRandom,
+    simulate,
+    simulateDailyLife,
+} from "./forgeSimulator";
 
 const regular = { name: "Régulier", strikesPerSecond: 3 };
 
@@ -50,5 +54,37 @@ describe("simulateur d'équilibrage", () => {
         const rate = r.criticalStrikes / r.strikesCounted;
         expect(rate).toBeGreaterThan(0.09);
         expect(rate).toBeLessThan(0.11);
+    });
+
+    it("simule une vie de joueur reproductible, sans dépasser Force 50", () => {
+        const options = {
+            days: 30,
+            sessionStartHours: [9, 20],
+            sessionMinutes: 30,
+            critical: true,
+            seed: 5,
+        };
+        const r = simulateDailyLife(regular, options);
+        expect(r).toEqual(simulateDailyLife(regular, options));
+        expect(r.playedSeconds).toBe(30 * 2 * 30 * 60);
+        expect(r.finalForce).toBeLessThanOrEqual(50);
+    });
+
+    it("fait progresser plus vite un joueur plus actif", () => {
+        const options = {
+            days: 10,
+            sessionStartHours: [9, 20],
+            sessionMinutes: 30,
+            critical: false,
+            seed: 1,
+        };
+        const calm = simulateDailyLife(
+            { name: "Tranquille", strikesPerSecond: 1 / 3 },
+            options,
+        );
+        const active = simulateDailyLife(regular, options);
+        expect(active.forceReachedAt[11]!).toBeLessThan(
+            calm.forceReachedAt[11]!,
+        );
     });
 });

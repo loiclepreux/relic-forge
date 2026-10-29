@@ -4,6 +4,9 @@ import type { ForgeProducers } from "./forgeState";
 export const CRITICAL_CHANCE = 0.1;
 export const CRITICAL_MULTIPLIER = 2;
 
+// Force de Forge maximale (Bible 13.2).
+export const MAX_FORGE_FORCE = 50;
+
 /** Tire au sort un coup critique. `random` est remplaçable dans les tests. */
 export function rollCriticalStrike(
     random: () => number = Math.random,
@@ -50,7 +53,7 @@ export function calculateProducerProduction(producers: ForgeProducers): number {
 }
 
 export function calculateForgeUpgradeCost(forgeForce: number): number {
-    return Math.ceil(25 * 1.18 ** forgeForce);
+    return Math.ceil(120 * 1.28 ** forgeForce);
 }
 
 export function calculateForgeUpgradeCostMilli(forgeForce: number): number {
@@ -58,8 +61,8 @@ export function calculateForgeUpgradeCostMilli(forgeForce: number): number {
 }
 
 export function calculateAwakenedEmberCostMilli(owned: number): number {
-    const baseCost = 15;
-    const growthRate = 1.15;
+    const baseCost = 200;
+    const growthRate = 1.3;
 
     const costEchoes = Math.ceil(baseCost * growthRate ** owned);
 
@@ -67,15 +70,15 @@ export function calculateAwakenedEmberCostMilli(owned: number): number {
 }
 
 export function getForgeStage(forgeForce: number): number {
-    if (forgeForce >= 20) {
+    if (forgeForce >= 41) {
         return 4;
     }
 
-    if (forgeForce >= 10) {
+    if (forgeForce >= 26) {
         return 3;
     }
 
-    if (forgeForce >= 5) {
+    if (forgeForce >= 11) {
         return 2;
     }
 

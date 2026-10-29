@@ -35,25 +35,25 @@ describe("gain de frappe (V8)", () => {
     });
 });
 
-describe("coût d'amélioration C(F) = ceil(25 × 1.18^F)", () => {
+describe("coût d'amélioration C(F) = ceil(120 × 1.28^F)", () => {
     it.each([
-        [0, 25],
-        [1, 30],
-        [5, 58],
-        [10, 131],
-        [20, 685],
-        [30, 3585],
-        [40, 18760],
+        [0, 120],
+        [1, 154],
+        [5, 413],
+        [10, 1417],
+        [20, 16726],
+        [30, 197461],
+        [40, 2331203],
     ])("F=%i coûte %i", (force, cost) => {
         expect(calculateForgeUpgradeCost(force)).toBe(cost);
     });
 });
 
 describe("Braise éveillée (coût provisoire)", () => {
-    it("coûte ceil(15 × 1.15^n)", () => {
-        expect(calculateAwakenedEmberCostMilli(0)).toBe(15000);
-        expect(calculateAwakenedEmberCostMilli(1)).toBe(18000);
-        expect(calculateAwakenedEmberCostMilli(10)).toBe(61000);
+    it("coûte ceil(200 × 1.3^n)", () => {
+        expect(calculateAwakenedEmberCostMilli(0)).toBe(200_000);
+        expect(calculateAwakenedEmberCostMilli(1)).toBe(260_000);
+        expect(calculateAwakenedEmberCostMilli(10)).toBe(2_758_000);
     });
 });
 
@@ -138,10 +138,13 @@ describe("gain hors ligne", () => {
 describe("stades de la Forge", () => {
     it.each([
         [0, 1, "Endormie"],
-        [4, 1, "Endormie"],
-        [5, 2, "Éveillée"],
-        [10, 3, "Ancestrale"],
-        [20, 4, "Transcendante"],
+        [10, 1, "Endormie"],
+        [11, 2, "Éveillée"],
+        [25, 2, "Éveillée"],
+        [26, 3, "Ancestrale"],
+        [40, 3, "Ancestrale"],
+        [41, 4, "Transcendante"],
+        [50, 4, "Transcendante"],
     ])("Force %i → stade %i (%s)", (force, stage, name) => {
         expect(getForgeStage(force)).toBe(stage);
         expect(getForgeStageName(stage)).toBe(name);
