@@ -18,7 +18,7 @@ enum ResourceType {
 
 /// Améliorations de la Forge.
 enum UpgradeKey {
-  STRIKE_POWER   // Force de Forge
+  STRIKE_POWER // Force de Forge
   AWAKENED_EMBER // Braises éveillées
 }
 
@@ -32,6 +32,21 @@ model User {
   forge        ForgeState?
   balances     ResourceBalance[]
   transactions EconomyTransaction[]
+  sessions     Session[]
+}
+
+/// Une session de connexion. Le navigateur garde un jeton secret dans un
+/// cookie ; la base n'en garde que l'empreinte (tokenHash).
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 /// État de la Forge d'un joueur.
