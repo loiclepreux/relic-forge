@@ -1228,3 +1228,91 @@
     border-radius: 6px;
     cursor: pointer;
 }
+
+/* =========================================================
+   16. TUTORIEL
+   ========================================================= */
+
+/* --- Bulle d'aide --- */
+
+.tutorial-bubble {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto 8px;
+    padding: 14px 18px;
+
+    text-align: left;
+    color: #f2ede4;
+    background: linear-gradient(
+        135deg,
+        rgba(60, 40, 20, 0.95),
+        rgba(25, 18, 14, 0.98)
+    );
+    border: 1px solid rgba(255, 190, 90, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 0 18px rgba(255, 150, 50, 0.2);
+
+    animation: tutorial-appear 0.3s ease-out;
+}
+
+.tutorial-bubble h3 {
+    margin: 2px 0 6px;
+    color: #ffd27a;
+    font-size: 1.05rem;
+}
+
+.tutorial-bubble p {
+    margin: 0 0 10px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.tutorial-bubble .tutorial-step {
+    margin: 0;
+    color: #bba88c;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.tutorial-bubble button {
+    padding: 4px 10px;
+
+    color: #bba88c;
+    font-size: 0.8rem;
+    background: transparent;
+    border: 1px solid rgba(220, 170, 100, 0.35);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+@keyframes tutorial-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Élément à utiliser : contour lumineux qui pulse --- */
+
+.tutorial-highlight {
+    outline: 2px solid #ffd27a;
+    outline-offset: 4px;
+    animation: tutorial-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tutorial-pulse {
+    0%,
+    100% {
+        outline-color: rgba(255, 210, 122, 0.35);
+    }
+
+    50% {
+        outline-color: rgba(255, 210, 122, 1);
+    }
+}

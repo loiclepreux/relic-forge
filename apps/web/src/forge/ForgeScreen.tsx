@@ -1,10 +1,24 @@
 import { useRef, useState } from "react";
 import { CRITICAL_CHANCE, CRITICAL_MULTIPLIER } from "@relic-forge/game-engine";
 import type { User } from "../api/authApi";
+import { TutorialBubble } from "./tutorialBubble";
+import { getTutorialStep } from "./tutorial";
 import { useServerForge } from "./useServerForge";
 
 /** Déblocage de la Braise éveillée (valeur provisoire de la V9). */
 const EMBER_REQUIRED_FORCE = 2;
+
+/** Mémorise dans ce navigateur qu'un joueur a passé le tutoriel. */
+const tutorialSkipKey = (userId: string) =>
+    `relic-forge-tutorial-skipped-${userId}`;
+
+function readTutorialSkipped(userId: string): boolean {
+    try {
+        return localStorage.getItem(tutorialSkipKey(userId)) === "1";
+    } catch {
+        return false;
+    }
+}
 
 const formatEchoes = (milli: number) =>
     (milli / 1000).toLocaleString("fr-FR", {
@@ -27,6 +41,10 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const [impactRings, setImpactRings] = useState<number[]>([]);
     const impactRingIdRef = useRef(0);
+
+    const [tutorialSkipped, setTutorialSkipped] = useState(() =>
+        readTutorialSkipped(user.id),
+    );
 
     const view = forge.view;
 
@@ -55,6 +73,19 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
             ? 100
             : Math.min(100, (echoes / upgradeCost) * 100);
     const stage = view.stage;
+
+    const tutorial = tutorialSkipped ? null : getTutorialStep(view, echoes);
+    const highlight = (target: string) =>
+        tutorial?.target === target ? "tutorial-highlight" : "";
+
+    function skipTutorial() {
+        setTutorialSkipped(true);
+        try {
+            localStorage.setItem(tutorialSkipKey(user.id), "1");
+        } catch {
+            // Stockage indisponible : le tutoriel reviendra au prochain chargement.
+        }
+    }
 
     function handleStrike() {
         const gain = forge.strike();
@@ -135,9 +166,12 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                 </div>
 
                 <div className="forge-center-panel">
+                    {tutorial && (
+                        <TutorialBubble step={tutorial} onSkip={skipTutorial} />
+                    )}
                     <button
                         type="button"
-                        className={`forge-core forge-core-stage-${stage} ${isStriking ? "forge-core-striking" : ""}`}
+                        className={`forge-core forge-core-stage-${stage} ${isStriking ? "forge-core-striking" : ""} ${highlight("core")}`}
                         onClick={handleStrike}
                         aria-label="Frapper la Forge"
                     >
@@ -204,7 +238,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                     {emberUnlocked && (
                         <button
                             type="button"
-                            className="forge-ember-button"
+                            className={`forge-ember-button ${highlight("ember")}`}
                             onClick={() => void forge.buy("AWAKENED_EMBER")}
                             disabled={!canBuyEmber}
                         >
@@ -223,7 +257,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                     </div>
                     <button
                         type="button"
-                        className={`forge-upgrade-button ${canUpgrade ? "forge-upgrade-ready" : ""}`}
+                        className={`forge-upgrade-button ${canUpgrade ? "forge-upgrade-ready" : ""} ${highlight("upgrade")}`}
                         onClick={() => void handleUpgrade()}
                         disabled={!canUpgrade}
                     >
