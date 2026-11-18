@@ -12,6 +12,11 @@ import {
     type ForgeView,
     type UpgradeKey,
 } from "../api/forgeApi";
+import {
+    createVisualEventBus,
+    detectStageChange,
+    type ForgeVisualEvents,
+} from "./visualEvents";
 
 // ---------------------------------------------------------------
 // Lien entre l'écran et le serveur. Le serveur décide de tout ;
@@ -43,6 +48,7 @@ export function useServerForge(onSessionExpired: () => void) {
     );
     const [message, setMessage] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    const [visualBus] = useState(createVisualEventBus);
 
     const serverRef = useRef<ServerState | null>(null);
     const pendingRef = useRef(0);
@@ -56,11 +62,19 @@ export function useServerForge(onSessionExpired: () => void) {
         expiredRef.current = onSessionExpired;
     }, [onSessionExpired]);
 
-    const applyServer = useCallback((view: ForgeView) => {
-        const next = { view, receivedAt: Date.now() };
-        serverRef.current = next;
-        setServer(next);
-    }, []);
+    const applyServer = useCallback(
+        (view: ForgeView) => {
+            const stageChange = detectStageChange(
+                serverRef.current?.view ?? null,
+                view,
+            );
+            const next = { view, receivedAt: Date.now() };
+            serverRef.current = next;
+            setServer(next);
+            if (stageChange) visualBus.emit(stageChange);
+        },
+        [visualBus],
+    );
 
     const handleError = useCallback((error: unknown) => {
         if (error instanceof ApiError && error.status === 401) {
@@ -90,6 +104,11 @@ export function useServerForge(onSessionExpired: () => void) {
                 retryRef.current = null;
                 applyServer(response.forge);
                 if (response.result && response.result.criticals > 0) {
+                    visualBus.emit({
+                        type: "CRITICAL",
+                        count: response.result.criticals,
+                        stage: response.forge.stage,
+                    });
                     setCriticalFlash(response.result.criticals);
                     window.setTimeout(() => setCriticalFlash(0), 900);
                 }
@@ -113,7 +132,7 @@ export function useServerForge(onSessionExpired: () => void) {
 
         inFlightRef.current = request;
         return request;
-    }, [applyServer, handleError]);
+    }, [applyServer, handleError, visualBus]);
 
     /** Recharge l'état depuis le serveur (sert aussi de signal de présence). */
     const refresh = useCallback(async () => {
@@ -205,12 +224,13 @@ export function useServerForge(onSessionExpired: () => void) {
 
         pendingRef.current++;
         setUnconfirmedStrikes((n) => n + 1);
+        visualBus.emit({ type: "STRIKE", stage: current.view.stage });
         return calculateStrikeGainMilli(
             1,
             current.view.forgeForce,
             current.view.productionPerSecond,
         );
-    }, []);
+    }, [visualBus]);
 
     /** Achat : on envoie d'abord les frappes en attente, puis l'achat. */
     const buy = useCallback(
@@ -220,6 +240,11 @@ export function useServerForge(onSessionExpired: () => void) {
             try {
                 await flush();
                 const response = await buyUpgrade(newRequestId(), upgradeKey);
+                visualBus.emit({
+                    type: "UPGRADE_PURCHASED",
+                    upgradeKey,
+                    stage: response.forge.stage,
+                });
                 applyServer(response.forge);
                 return true;
             } catch (error) {
@@ -229,7 +254,7 @@ export function useServerForge(onSessionExpired: () => void) {
                 setBusy(false);
             }
         },
-        [applyServer, flush, handleError],
+        [applyServer, flush, handleError, visualBus],
     );
 
     // ---- Valeurs affichées ----
@@ -254,6 +279,8 @@ export function useServerForge(onSessionExpired: () => void) {
           productionSinceMilli
         : 0;
 
+    const visualEvents: ForgeVisualEvents = visualBus;
+
     return {
         view,
         displayedEchoesMilli,
@@ -266,5 +293,6 @@ export function useServerForge(onSessionExpired: () => void) {
         busy,
         strike,
         buy,
+        visualEvents,
     };
 }
