@@ -65,6 +65,16 @@ export class AnvilActor {
         this.view.scale.set(size / DESIGN_SIZE);
     }
 
+    /** Le point de frappe, en pixels de la scène, et l'échelle de l'enclume. */
+    hotspot(): { x: number; y: number; scale: number } {
+        const scale = this.view.scale.x;
+        return {
+            x: this.view.x + HOTSPOT.x * scale,
+            y: this.view.y + HOTSPOT.y * scale,
+            scale,
+        };
+    }
+
     private applyFrame(frame: {
         scaleX: number;
         scaleY: number;
