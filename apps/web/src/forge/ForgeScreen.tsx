@@ -40,8 +40,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
     const [isStriking, setIsStriking] = useState(false);
     const [strikeGainShown, setStrikeGainShown] = useState<number | null>(null);
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
-    const [impactRings, setImpactRings] = useState<number[]>([]);
-    const impactRingIdRef = useRef(0);
+    const anvilRef = useRef<HTMLButtonElement>(null);
 
     const [tutorialSkipped, setTutorialSkipped] = useState(() =>
         readTutorialSkipped(user.id),
@@ -94,13 +93,6 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
 
         setStrikeGainShown(gain);
         setIsStriking(true);
-        const ringId = ++impactRingIdRef.current;
-        setImpactRings((rings) => [...rings, ringId]);
-        window.setTimeout(
-            () =>
-                setImpactRings((rings) => rings.filter((id) => id !== ringId)),
-            350,
-        );
         window.setTimeout(() => setIsStriking(false), 120);
         window.setTimeout(() => setStrikeGainShown(null), 600);
     }
@@ -167,25 +159,21 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                 </div>
 
                 <div className="forge-center-panel">
-                    <ForgeCanvas />
+                    <ForgeCanvas
+                        visualEvents={forge.visualEvents}
+                        anchorRef={anvilRef}
+                    />
                     {tutorial && (
                         <TutorialBubble step={tutorial} onSkip={skipTutorial} />
                     )}
+                    {/* Zone de frappe : l'enclume est dessinée dessous par PixiJS. */}
                     <button
+                        ref={anvilRef}
                         type="button"
-                        className={`forge-core forge-core-stage-${stage} ${isStriking ? "forge-core-striking" : ""} ${highlight("core")}`}
+                        className={`forge-anvil-hit ${highlight("core")}`}
                         onClick={handleStrike}
                         aria-label="Frapper la Forge"
-                    >
-                        {impactRings.map((id) => (
-                            <span
-                                key={id}
-                                className={`forge-impact-ring forge-impact-ring-active forge-impact-ring-stage-${stage}`}
-                                aria-hidden="true"
-                            />
-                        ))}
-                        <span className="forge-core-symbol">✦</span>
-                    </button>
+                    />
                     <button
                         type="button"
                         className={`forge-button forge-button-stage-${stage}`}

@@ -1,4 +1,6 @@
 import { Application, Container, Graphics, type Ticker } from "pixi.js";
+import type { ForgeVisualEvent, ForgeVisualEvents } from "../visualEvents";
+import { AnvilActor } from "./AnvilActor";
 import { FORGE_LAYERS, type ForgeLayerName } from "./layers";
 
 /** Lueur des braises : beaucoup de cercles très légers, pour un dégradé sans marches. */
@@ -11,6 +13,16 @@ const GLOW_COLOR = 0xff8a2a;
 /** Une respiration lente, pour ne pas fatiguer l'œil (Bible 24.16). */
 const GLOW_BREATH_SECONDS = 4;
 
+/** Zone de frappe, en pixels, par rapport au coin haut gauche de la scène. */
+export type ForgeAnchor = { x: number; y: number; size: number };
+
+export type ForgeSceneOptions = {
+    /** Les événements visuels du jeu (frappes, critiques…). */
+    visualEvents?: ForgeVisualEvents;
+    /** Où se trouve la zone de frappe ; relu à chaque image. */
+    getAnchor?: () => ForgeAnchor | null;
+};
+
 /**
  * La scène PixiJS de la Forge. Elle ne connaît rien de l'économie :
  * elle dessine seulement ce qu'on lui demande.
@@ -19,26 +31,44 @@ export class ForgeScene {
     readonly layers: Record<ForgeLayerName, Container>;
     private readonly app: Application;
     private readonly glow: Graphics;
+    private readonly anvil: AnvilActor;
+    private readonly getAnchor: () => ForgeAnchor | null;
+    private readonly unsubscribe: () => void;
+    private readonly reducedMotion: boolean;
     private elapsedSeconds = 0;
     private destroyed = false;
 
     private constructor(
         app: Application,
         layers: Record<ForgeLayerName, Container>,
+        options: ForgeSceneOptions,
     ) {
         this.app = app;
         this.layers = layers;
+        this.getAnchor = options.getAnchor ?? (() => null);
+        this.reducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
 
         this.glow = new Graphics();
         this.layers.ambiance.addChild(this.glow);
+        this.drawGlow();
+
+        this.anvil = new AnvilActor();
+        this.layers.anvil.addChild(this.anvil.view);
+
+        this.unsubscribe =
+            options.visualEvents?.subscribe(this.onVisualEvent) ?? (() => {});
 
         this.app.ticker.add(this.update);
-        this.app.renderer.on("resize", this.layout);
-        this.layout();
+        this.app.renderer.on("resize", this.drawGlow);
     }
 
     /** Crée la scène et place son canvas dans `host` (il en prend la taille). */
-    static async create(host: HTMLElement): Promise<ForgeScene> {
+    static async create(
+        host: HTMLElement,
+        options: ForgeSceneOptions = {},
+    ): Promise<ForgeScene> {
         const app = new Application();
         await app.init({
             resizeTo: host,
@@ -56,24 +86,31 @@ export class ForgeScene {
             layers[name] = layer;
         }
 
-        return new ForgeScene(app, layers);
+        return new ForgeScene(app, layers, options);
     }
 
     /** Libère tout : canvas, textures, animations. Sans effet si déjà fait. */
     destroy() {
         if (this.destroyed) return;
         this.destroyed = true;
+        this.unsubscribe();
         this.app.ticker.remove(this.update);
-        this.app.renderer.off("resize", this.layout);
+        this.app.renderer.off("resize", this.drawGlow);
         this.app.destroy(
             { removeView: true },
             { children: true, texture: true, textureSource: true },
         );
     }
 
-    /** Recalcule les positions quand la fenêtre change de taille. */
-    private layout = () => {
-        const { width, height } = this.app.screen;
+    private onVisualEvent = (event: ForgeVisualEvent) => {
+        const now = performance.now();
+        if (event.type === "STRIKE") this.anvil.strike("normal", now);
+        if (event.type === "CRITICAL") this.anvil.strike("critical", now);
+    };
+
+    /** La lueur est redessinée seulement quand la scène change de taille. */
+    private drawGlow = () => {
+        const { height } = this.app.screen;
         this.glow.clear();
         for (let i = GLOW_RING_COUNT; i >= 1; i--) {
             const radius = (i / GLOW_RING_COUNT) * GLOW_MAX_RADIUS * height;
@@ -81,12 +118,25 @@ export class ForgeScene {
                 .circle(0, 0, radius)
                 .fill({ color: GLOW_COLOR, alpha: GLOW_RING_ALPHA });
         }
-        this.glow.position.set(width / 2, height * 0.55);
     };
 
     private update = (ticker: Ticker) => {
         this.elapsedSeconds += ticker.deltaMS / 1000;
+
+        // La lueur et l'enclume suivent la zone de frappe (elle bouge
+        // quand la bulle du tutoriel apparaît ou disparaît).
+        const { width, height } = this.app.screen;
+        const anchor = this.getAnchor() ?? {
+            x: width / 2,
+            y: height * 0.55,
+            size: 240,
+        };
+        this.glow.position.set(anchor.x, anchor.y);
+        this.anvil.place(anchor.x, anchor.y, anchor.size);
+
         const phase = (this.elapsedSeconds / GLOW_BREATH_SECONDS) * Math.PI * 2;
         this.glow.alpha = 0.8 + 0.2 * Math.sin(phase);
+
+        this.anvil.update(performance.now(), this.reducedMotion);
     };
 }

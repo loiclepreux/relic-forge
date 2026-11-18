@@ -7,16 +7,15 @@
    4.  Panneaux latéraux (commun)
    5.  Panneau Caractéristiques
    6.  Panneau central
-   7.  Noyau de la Forge
-   8.  Ondes d'impact
-   9.  Bouton Frapper
-   10. Gain de frappe
-   11. Panneau Améliorations
-   12. Barre de progression
-   13. Messages (hors ligne, erreur)
-   14. Connexion et compte
-   15. Tutoriel
-   16. Scène PixiJS
+   7.  Zone de frappe de l'enclume
+   8.  Bouton Frapper
+   9.  Gain de frappe
+   10. Panneau Améliorations
+   11. Barre de progression
+   12. Messages (hors ligne, erreur)
+   13. Connexion et compte
+   14. Tutoriel
+   15. Scène PixiJS
 
    Règle d'ordre : dans chaque section, la règle de base vient
    d'abord, puis les variantes de stade, puis les états
@@ -384,322 +383,30 @@
 }
 
 /* =========================================================
-   7. NOYAU DE LA FORGE
+   7. ZONE DE FRAPPE DE L'ENCLUME
    ========================================================= */
 
-.forge-core {
+/* Invisible : l'enclume est dessinée dessous par PixiJS (section 15).
+   Le bouton garde le clic, le clavier et le surlignage du tutoriel. */
+.forge-anvil-hit {
     width: 240px;
     height: 240px;
     margin: 20px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    border: 2px solid #52525b;
+
+    border: none;
     border-radius: 50%;
+    background: transparent;
 
-    background: radial-gradient(
-        circle,
-        rgba(63, 63, 70, 0.8) 0%,
-        rgba(24, 24, 27, 0.95) 70%
-    );
-
-    color: #f4f4f5;
     cursor: pointer;
-
-    transition:
-        transform 0.1s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
 }
 
-/* --- Anneau métallique --- */
-
-.forge-core::before {
-    content: "";
-    position: absolute;
-    inset: 12px;
-
-    border: 2px solid rgba(210, 160, 90, 0.45);
-    border-radius: 50%;
-
-    box-shadow:
-        inset 0 0 12px rgba(0, 0, 0, 0.65),
-        0 0 10px rgba(255, 160, 60, 0.12);
-
-    pointer-events: none;
-}
-
-/* --- Gravures runiques (rotation lente) --- */
-
-.forge-core::after {
-    content: "";
-    position: absolute;
-    inset: 24px;
-
-    border: 1px dashed rgba(220, 170, 100, 0.35);
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 8px rgba(255, 150, 50, 0.1),
-        inset 0 0 8px rgba(255, 150, 50, 0.08);
-
-    pointer-events: none;
-
-    animation: forge-runes-rotation 30s linear infinite;
-}
-
-/* --- Symbole magique (pulsation) --- */
-
-.forge-core-symbol {
-    position: relative;
-    z-index: 1;
-
-    font-size: 3rem;
-    line-height: 1;
-    pointer-events: none;
-
-    animation: forge-symbol-glow 3s ease-in-out infinite;
-}
-
-/* --- Couleurs du noyau selon le stade --- */
-
-/* Stade 1 : Endormie */
-.forge-core-stage-1 {
-    border-color: #52525b;
-
-    background: radial-gradient(
-        circle,
-        rgba(82, 82, 91, 0.35) 0%,
-        rgba(39, 39, 42, 0.55) 40%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    box-shadow:
-        0 0 8px rgba(82, 82, 91, 0.18),
-        inset 0 0 18px rgba(0, 0, 0, 0.35);
-}
-
-.forge-core-stage-1 .forge-core-symbol {
-    color: #a1a1aa;
-    text-shadow: 0 0 5px rgba(161, 161, 170, 0.25);
-}
-
-/* Stade 2 : Éveillée */
-.forge-core-stage-2 {
-    border-color: #a16207;
-
-    background: radial-gradient(
-        circle,
-        rgba(217, 119, 6, 0.4) 0%,
-        rgba(120, 53, 15, 0.45) 40%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    box-shadow:
-        0 0 12px rgba(217, 119, 6, 0.22),
-        0 0 24px rgba(161, 98, 7, 0.12);
-}
-
-.forge-core-stage-2 .forge-core-symbol {
-    color: #fde68a;
-    text-shadow:
-        0 0 6px rgba(253, 230, 138, 0.45),
-        0 0 12px rgba(217, 119, 6, 0.3);
-}
-
-/* Stade 3 : Ancestrale */
-.forge-core-stage-3 {
-    border-color: #ea580c;
-
-    background: radial-gradient(
-        circle,
-        rgba(249, 115, 22, 0.55) 0%,
-        rgba(154, 52, 18, 0.55) 40%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    box-shadow:
-        0 0 18px rgba(249, 115, 22, 0.32),
-        0 0 36px rgba(234, 88, 12, 0.18);
-}
-
-.forge-core-stage-3 .forge-core-symbol {
-    color: #ffedd5;
-    text-shadow:
-        0 0 8px rgba(255, 237, 213, 0.6),
-        0 0 16px rgba(249, 115, 22, 0.45);
-}
-
-/* Stade 4 : Transcendante (le noyau pulse) */
-.forge-core-stage-4 {
-    border-color: #ef4444;
-
-    background: radial-gradient(
-        circle,
-        rgba(239, 68, 68, 0.55) 0%,
-        rgba(127, 29, 29, 0.55) 35%,
-        rgba(24, 24, 27, 0.98) 75%
-    );
-
-    animation: forge-core-pulse 2.4s ease-in-out infinite;
-}
-
-.forge-core-stage-4 .forge-core-symbol {
-    color: #fee2e2;
-    text-shadow:
-        0 0 8px rgba(254, 226, 226, 0.8),
-        0 0 18px rgba(239, 68, 68, 0.65);
-}
-
-/* --- États : frappe, survol, clic --- */
-
-.forge-core-striking {
-    transform: scale(0.92);
-    filter: brightness(1.5);
-}
-
-.forge-core:hover {
-    transform: scale(1.04);
-    filter: brightness(1.15);
-
-    border-color: #d6a35e;
-
-    box-shadow:
-        0 0 20px rgba(255, 170, 70, 0.3),
-        0 0 45px rgba(255, 110, 30, 0.15),
-        inset 0 0 25px rgba(255, 160, 60, 0.12);
-}
-
-.forge-core:active {
-    transform: scale(0.92);
-}
-
-/* --- Lueur au survol selon le stade --- */
-
-.forge-core-stage-1:hover {
-    border-color: #a1a1aa;
-    box-shadow:
-        0 0 20px rgba(161, 161, 170, 0.3),
-        0 0 45px rgba(113, 113, 122, 0.15);
-}
-
-.forge-core-stage-2:hover {
-    border-color: #fbbf24;
-    box-shadow:
-        0 0 20px rgba(251, 191, 36, 0.4),
-        0 0 45px rgba(217, 119, 6, 0.2);
-}
-
-.forge-core-stage-3:hover {
-    border-color: #fb923c;
-    box-shadow:
-        0 0 25px rgba(249, 115, 22, 0.5),
-        0 0 50px rgba(234, 88, 12, 0.25);
-}
-
-.forge-core-stage-4:hover {
-    border-color: #f87171;
-    box-shadow:
-        0 0 30px rgba(239, 68, 68, 0.6),
-        0 0 60px rgba(220, 38, 38, 0.3);
-}
-
-/* --- Animations du noyau --- */
-
-@keyframes forge-runes-rotation {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes forge-symbol-glow {
-    0%,
-    100% {
-        opacity: 0.8;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.15);
-    }
-}
-
-@keyframes forge-core-pulse {
-    0%,
-    100% {
-        box-shadow:
-            0 0 18px rgba(239, 68, 68, 0.35),
-            0 0 40px rgba(220, 38, 38, 0.18);
-        filter: brightness(1);
-    }
-
-    50% {
-        box-shadow:
-            0 0 34px rgba(239, 68, 68, 0.65),
-            0 0 70px rgba(220, 38, 38, 0.4);
-        filter: brightness(1.12);
-    }
+.forge-anvil-hit:focus-visible {
+    outline: 2px solid #ffd27a;
+    outline-offset: 4px;
 }
 
 /* =========================================================
-   8. ONDES D'IMPACT
-   ========================================================= */
-
-.forge-impact-ring {
-    position: absolute;
-    inset: 0;
-
-    border: 2px solid rgba(255, 180, 100, 0.85);
-    border-radius: 50%;
-
-    opacity: 0;
-    transform: scale(0.85);
-
-    pointer-events: none;
-}
-
-.forge-impact-ring-active {
-    animation: forge-impact-wave 0.35s ease-out forwards;
-}
-
-/* --- Couleur de l'onde selon le stade --- */
-
-.forge-impact-ring-stage-1 {
-    border-color: rgba(170, 180, 190, 0.75);
-}
-
-.forge-impact-ring-stage-2 {
-    border-color: rgba(255, 190, 80, 0.85);
-}
-
-.forge-impact-ring-stage-3 {
-    border-color: rgba(255, 110, 35, 0.9);
-}
-
-.forge-impact-ring-stage-4 {
-    border-color: rgba(255, 45, 45, 0.95);
-}
-
-@keyframes forge-impact-wave {
-    0% {
-        opacity: 0.9;
-        transform: scale(0.85);
-    }
-
-    100% {
-        opacity: 0;
-        transform: scale(1.5);
-    }
-}
-
-/* =========================================================
-   9. BOUTON FRAPPER
+   8. BOUTON FRAPPER
    ========================================================= */
 
 .forge-button {
@@ -791,7 +498,7 @@
 }
 
 /* =========================================================
-   10. GAIN DE FRAPPE
+   9. GAIN DE FRAPPE
    ========================================================= */
 
 .strike-gain {
@@ -839,7 +546,7 @@
 }
 
 /* =========================================================
-   11. PANNEAU AMÉLIORATIONS (braises)
+   10. PANNEAU AMÉLIORATIONS (braises)
    ========================================================= */
 
 .forge-upgrades-panel {
@@ -1004,7 +711,7 @@
 }
 
 /* =========================================================
-   12. BARRE DE PROGRESSION
+   11. BARRE DE PROGRESSION
    ========================================================= */
 
 .forge-upgrade-progress {
@@ -1055,7 +762,7 @@
 }
 
 /* =========================================================
-   13. MESSAGES (HORS LIGNE, ERREUR DE SAUVEGARDE)
+   12. MESSAGES (HORS LIGNE, ERREUR DE SAUVEGARDE)
    ========================================================= */
 
 .forge-offline-message {
@@ -1101,7 +808,7 @@
 }
 
 /* =========================================================
-   14. CONNEXION ET COMPTE
+   13. CONNEXION ET COMPTE
    ========================================================= */
 
 .auth-loading {
@@ -1220,7 +927,7 @@
 }
 
 /* =========================================================
-   15. TUTORIEL
+   14. TUTORIEL
    ========================================================= */
 
 /* --- Bulle d'aide --- */
@@ -1308,7 +1015,7 @@
 }
 
 /* =========================================================
-   16. SCÈNE PIXIJS
+   15. SCÈNE PIXIJS
    ========================================================= */
 
 /* Derrière le contenu du panneau central, sans recevoir de clic. */
