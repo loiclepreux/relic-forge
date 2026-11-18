@@ -2,6 +2,7 @@ import { Application, Container, Graphics, type Ticker } from "pixi.js";
 import type { ForgeVisualEvent, ForgeVisualEvents } from "../visualEvents";
 import { AnvilActor } from "./AnvilActor";
 import { FORGE_LAYERS, type ForgeLayerName } from "./layers";
+import { ReactionLayer } from "./ReactionLayer";
 import { SparkLayer } from "./SparkLayer";
 import { sparkBurst } from "./sparks";
 
@@ -38,6 +39,7 @@ export class ForgeScene {
     private readonly glow: Graphics;
     private readonly anvil: AnvilActor;
     private readonly sparks: SparkLayer;
+    private readonly reactions: ReactionLayer;
     private readonly getAnchor: () => ForgeAnchor | null;
     private readonly unsubscribe: () => void;
     private readonly reducedMotion: boolean;
@@ -65,6 +67,9 @@ export class ForgeScene {
 
         this.sparks = new SparkLayer(this.app.renderer);
         this.layers.effects.addChild(this.sparks.view);
+
+        this.reactions = new ReactionLayer();
+        this.layers.events.addChild(this.reactions.view);
 
         this.unsubscribe =
             options.visualEvents?.subscribe(this.onVisualEvent) ?? (() => {});
@@ -112,17 +117,32 @@ export class ForgeScene {
     }
 
     private onVisualEvent = (event: ForgeVisualEvent) => {
-        if (event.type !== "STRIKE" && event.type !== "CRITICAL") return;
-        const kind = event.type === "CRITICAL" ? "critical" : "normal";
-        this.anvil.strike(kind, performance.now());
-        this.sparks.emit(
-            sparkBurst({
-                kind,
-                stage: event.stage,
-                // Animations réduites : moitié moins d'étincelles.
-                density: this.reducedMotion ? 0.5 : 1,
-            }),
-        );
+        const now = performance.now();
+        switch (event.type) {
+            case "STRIKE":
+            case "CRITICAL": {
+                const kind = event.type === "CRITICAL" ? "critical" : "normal";
+                this.anvil.strike(kind, now);
+                this.sparks.emit(
+                    sparkBurst({
+                        kind,
+                        stage: event.stage,
+                        // Animations réduites : moitié moins d'étincelles.
+                        density: this.reducedMotion ? 0.5 : 1,
+                    }),
+                );
+                break;
+            }
+            case "UPGRADE_PURCHASED":
+                this.reactions.start(
+                    event.upgradeKey === "AWAKENED_EMBER" ? "ember" : "upgrade",
+                    now,
+                );
+                break;
+            case "STAGE_CHANGED":
+                this.reactions.start("stage", now);
+                break;
+        }
     };
 
     /** La lueur est redessinée seulement quand la scène change de taille. */
@@ -157,6 +177,13 @@ export class ForgeScene {
         this.anvil.update(performance.now(), this.reducedMotion);
 
         const hotspot = this.anvil.hotspot();
+        this.reactions.update(
+            performance.now(),
+            anchor.x,
+            anchor.y,
+            hotspot.scale,
+            this.reducedMotion,
+        );
         this.sparks.update(
             Math.min(ticker.deltaMS / 1000, MAX_FRAME_SECONDS),
             hotspot.x,
