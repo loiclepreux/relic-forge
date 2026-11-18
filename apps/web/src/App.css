@@ -16,6 +16,7 @@
    13. Messages (hors ligne, erreur)
    14. Connexion et compte
    15. Tutoriel
+   16. Scène PixiJS
 
    Règle d'ordre : dans chaque section, la règle de base vient
    d'abord, puis les variantes de stade, puis les états
@@ -331,6 +332,8 @@
 
 .forge-center-panel {
     position: relative;
+    /* Contexte d'empilement : la scène PixiJS passe derrière le contenu. */
+    isolation: isolate;
 
     width: 100%;
     min-height: 100%;
@@ -1302,4 +1305,22 @@
     50% {
         outline-color: rgba(255, 210, 122, 1);
     }
+}
+
+/* =========================================================
+   16. SCÈNE PIXIJS
+   ========================================================= */
+
+/* Derrière le contenu du panneau central, sans recevoir de clic. */
+.forge-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.forge-canvas canvas {
+    display: block;
 }

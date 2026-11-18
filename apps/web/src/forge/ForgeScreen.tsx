@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { CRITICAL_CHANCE, CRITICAL_MULTIPLIER } from "@relic-forge/game-engine";
 import type { User } from "../api/authApi";
+import { ForgeCanvas } from "./ForgeCanvas";
 import { TutorialBubble } from "./tutorialBubble";
 import { getTutorialStep } from "./tutorial";
 import { useServerForge } from "./useServerForge";
@@ -166,6 +167,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                 </div>
 
                 <div className="forge-center-panel">
+                    <ForgeCanvas />
                     {tutorial && (
                         <TutorialBubble step={tutorial} onSkip={skipTutorial} />
                     )}
