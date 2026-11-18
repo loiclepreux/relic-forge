@@ -14,7 +14,8 @@
    11. Panneau Améliorations
    12. Barre de progression
    13. Messages (hors ligne, erreur)
-   14. Outil de développement
+   14. Connexion et compte
+   15. Tutoriel
 
    Règle d'ordre : dans chaque section, la règle de base vient
    d'abord, puis les variantes de stade, puis les états
@@ -1097,21 +1098,7 @@
 }
 
 /* =========================================================
-   14. OUTIL DE DÉVELOPPEMENT
-   ========================================================= */
-
-.forge-dev-reset {
-    position: fixed;
-    right: 12px;
-    bottom: 12px;
-
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    opacity: 0.6;
-}
-
-/* =========================================================
-   15. CONNEXION ET COMPTE
+   14. CONNEXION ET COMPTE
    ========================================================= */
 
 .auth-loading {
@@ -1230,7 +1217,7 @@
 }
 
 /* =========================================================
-   16. TUTORIEL
+   15. TUTORIEL
    ========================================================= */
 
 /* --- Bulle d'aide --- */
