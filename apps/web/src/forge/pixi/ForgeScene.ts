@@ -1,10 +1,13 @@
 import { Application, Container, Graphics, type Ticker } from "pixi.js";
 import type { ForgeVisualEvent, ForgeVisualEvents } from "../visualEvents";
 import { AnvilActor } from "./AnvilActor";
+import { HammerActor } from "./HammerActor";
+import { HAMMER_IMPACT_MS } from "./hammerAnimation";
 import { FORGE_LAYERS, type ForgeLayerName } from "./layers";
 import { ReactionLayer } from "./ReactionLayer";
 import { SparkLayer } from "./SparkLayer";
 import { sparkBurst } from "./sparks";
+import type { StrikeKind } from "./anvilAnimation";
 
 /** Lueur des braises : beaucoup de cercles très légers, pour un dégradé sans marches. */
 const GLOW_RING_COUNT = 24;
@@ -20,7 +23,16 @@ const GLOW_BREATH_SECONDS = 4;
 const MAX_FRAME_SECONDS = 0.05;
 
 /** Zone de frappe, en pixels, par rapport au coin haut gauche de la scène. */
-export type ForgeAnchor = { x: number; y: number; size: number };
+export type ForgeAnchor = {
+    x: number;
+    y: number;
+    size: number;
+    /** La souris ou le clavier est sur la zone de frappe. */
+    hovered?: boolean;
+};
+
+/** Un impact prévu : le marteau n'a pas encore touché l'enclume. */
+type PendingImpact = { at: number; kind: StrikeKind; stage: number };
 
 export type ForgeSceneOptions = {
     /** Les événements visuels du jeu (frappes, critiques…). */
@@ -38,6 +50,8 @@ export class ForgeScene {
     private readonly app: Application;
     private readonly glow: Graphics;
     private readonly anvil: AnvilActor;
+    private readonly hammer: HammerActor;
+    private pendingImpacts: PendingImpact[] = [];
     private readonly sparks: SparkLayer;
     private readonly reactions: ReactionLayer;
     private readonly getAnchor: () => ForgeAnchor | null;
@@ -63,7 +77,8 @@ export class ForgeScene {
         this.drawGlow();
 
         this.anvil = new AnvilActor();
-        this.layers.anvil.addChild(this.anvil.view);
+        this.hammer = new HammerActor();
+        this.layers.anvil.addChild(this.anvil.view, this.hammer.view);
 
         this.sparks = new SparkLayer(this.app.renderer);
         this.layers.effects.addChild(this.sparks.view);
@@ -120,19 +135,19 @@ export class ForgeScene {
         const now = performance.now();
         switch (event.type) {
             case "STRIKE":
-            case "CRITICAL": {
-                const kind = event.type === "CRITICAL" ? "critical" : "normal";
-                this.anvil.strike(kind, now);
-                this.sparks.emit(
-                    sparkBurst({
-                        kind,
-                        stage: event.stage,
-                        // Animations réduites : moitié moins d'étincelles.
-                        density: this.reducedMotion ? 0.5 : 1,
-                    }),
-                );
+                // Le marteau part tout de suite ; l'impact suit quand il touche.
+                this.hammer.strike(now);
+                this.pendingImpacts.push({
+                    at: this.reducedMotion ? now : now + HAMMER_IMPACT_MS,
+                    kind: "normal",
+                    stage: event.stage,
+                });
                 break;
-            }
+            case "CRITICAL":
+                // Le critique est confirmé par le serveur après coup :
+                // l'enclume s'embrase sans nouveau coup de marteau.
+                this.impact({ at: now, kind: "critical", stage: event.stage });
+                break;
             case "UPGRADE_PURCHASED":
                 this.reactions.start(
                     event.upgradeKey === "AWAKENED_EMBER" ? "ember" : "upgrade",
@@ -144,6 +159,18 @@ export class ForgeScene {
                 break;
         }
     };
+
+    private impact(impact: PendingImpact) {
+        this.anvil.strike(impact.kind, impact.at);
+        this.sparks.emit(
+            sparkBurst({
+                kind: impact.kind,
+                stage: impact.stage,
+                // Animations réduites : moitié moins d'étincelles.
+                density: this.reducedMotion ? 0.5 : 1,
+            }),
+        );
+    }
 
     /** La lueur est redessinée seulement quand la scène change de taille. */
     private drawGlow = () => {
@@ -170,15 +197,24 @@ export class ForgeScene {
         };
         this.glow.position.set(anchor.x, anchor.y);
         this.anvil.place(anchor.x, anchor.y, anchor.size);
+        this.anvil.setHovered(anchor.hovered ?? false);
 
         const phase = (this.elapsedSeconds / GLOW_BREATH_SECONDS) * Math.PI * 2;
         this.glow.alpha = 0.8 + 0.2 * Math.sin(phase);
 
-        this.anvil.update(performance.now(), this.reducedMotion);
+        const now = performance.now();
+        for (const impact of this.pendingImpacts.filter((i) => i.at <= now)) {
+            this.impact(impact);
+        }
+        this.pendingImpacts = this.pendingImpacts.filter((i) => i.at > now);
+
+        this.anvil.update(now, this.reducedMotion);
 
         const hotspot = this.anvil.hotspot();
+        this.hammer.place(anchor.x, anchor.y, hotspot.scale);
+        this.hammer.update(now, this.reducedMotion);
         this.reactions.update(
-            performance.now(),
+            now,
             anchor.x,
             anchor.y,
             hotspot.scale,

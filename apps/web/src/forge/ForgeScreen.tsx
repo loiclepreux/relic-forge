@@ -166,7 +166,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                     {tutorial && (
                         <TutorialBubble step={tutorial} onSkip={skipTutorial} />
                     )}
-                    {/* Zone de frappe : l'enclume est dessinée dessous par PixiJS. */}
+                    {/* L'enclume est le bouton : PixiJS la dessine sous cette zone. */}
                     <button
                         ref={anvilRef}
                         type="button"
@@ -174,14 +174,28 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                         onClick={handleStrike}
                         aria-label="Frapper la Forge"
                     />
-                    <button
-                        type="button"
-                        className={`forge-button forge-button-stage-${stage}`}
-                        onClick={handleStrike}
-                    >
-                        Frapper
-                    </button>
                     <h2>{formatEchoes(echoes)} Échos</h2>
+                    {/* Hauteur fixe : les messages de frappe ne font pas bouger l'enclume. */}
+                    <div className="forge-feedback">
+                        {strikeGainShown !== null && (
+                            <span className="strike-gain">
+                                +{formatEchoes(strikeGainShown)} Échos
+                            </span>
+                        )}
+                        {forge.criticalFlash > 0 && (
+                            <span className="strike-gain strike-gain-critical">
+                                CRITIQUE !
+                                {forge.criticalFlash > 1
+                                    ? ` ×${forge.criticalFlash}`
+                                    : ""}
+                            </span>
+                        )}
+                        {showUpgradeFeedback && (
+                            <p className="forge-upgrade-feedback">
+                                ⚒️ Forge améliorée ! Force +1
+                            </p>
+                        )}
+                    </div>
 
                     {forge.absenceGainMilli !== null && (
                         <div className="forge-offline-message">
@@ -196,24 +210,6 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                                 Fermer
                             </button>
                         </div>
-                    )}
-                    {strikeGainShown !== null && (
-                        <span className="strike-gain">
-                            +{formatEchoes(strikeGainShown)} Échos
-                        </span>
-                    )}
-                    {forge.criticalFlash > 0 && (
-                        <span className="strike-gain strike-gain-critical">
-                            CRITIQUE !
-                            {forge.criticalFlash > 1
-                                ? ` ×${forge.criticalFlash}`
-                                : ""}
-                        </span>
-                    )}
-                    {showUpgradeFeedback && (
-                        <p className="forge-upgrade-feedback">
-                            ⚒️ Forge améliorée ! Force +1
-                        </p>
                     )}
                 </div>
 

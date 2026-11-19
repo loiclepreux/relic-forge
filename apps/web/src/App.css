@@ -8,14 +8,13 @@
    5.  Panneau Caractéristiques
    6.  Panneau central
    7.  Zone de frappe de l'enclume
-   8.  Bouton Frapper
-   9.  Gain de frappe
-   10. Panneau Améliorations
-   11. Barre de progression
-   12. Messages (hors ligne, erreur)
-   13. Connexion et compte
-   14. Tutoriel
-   15. Scène PixiJS
+   8.  Gain de frappe
+   9.  Panneau Améliorations
+   10. Barre de progression
+   11. Messages (hors ligne, erreur)
+   12. Connexion et compte
+   13. Tutoriel
+   14. Scène PixiJS
 
    Règle d'ordre : dans chaque section, la règle de base vient
    d'abord, puis les variantes de stade, puis les états
@@ -386,7 +385,7 @@
    7. ZONE DE FRAPPE DE L'ENCLUME
    ========================================================= */
 
-/* Invisible : l'enclume est dessinée dessous par PixiJS (section 15).
+/* Invisible : l'enclume est dessinée dessous par PixiJS (section 14).
    Le bouton garde le clic, le clavier et le surlignage du tutoriel. */
 .forge-anvil-hit {
     width: 240px;
@@ -406,100 +405,19 @@
 }
 
 /* =========================================================
-   8. BOUTON FRAPPER
+   8. GAIN DE FRAPPE
    ========================================================= */
 
-.forge-button {
-    width: 220px;
-    min-height: 56px;
-    padding: 14px 24px;
+/* Zone des messages de frappe, de hauteur fixe : ils apparaissent
+   et disparaissent sans décaler l'enclume ni le compteur. */
+.forge-feedback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 8px;
-
-    font-size: 1.15rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-
-    box-shadow:
-        inset 0 2px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -4px 0 rgba(0, 0, 0, 0.3),
-        0 6px 18px rgba(0, 0, 0, 0.45);
-
-    cursor: pointer;
-
-    transition:
-        transform 0.08s ease,
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
+    min-height: 5.5rem;
 }
-
-/* --- Couleurs du bouton selon le stade --- */
-
-/* Stade 1 : Endormie */
-.forge-button-stage-1 {
-    border-color: #52525b;
-    background: rgba(39, 39, 42, 0.6);
-    color: #d4d4d8;
-}
-
-.forge-button-stage-1:hover {
-    background: rgba(63, 63, 70, 0.7);
-    box-shadow: 0 0 12px rgba(113, 113, 122, 0.25);
-}
-
-/* Stade 2 : Éveillée */
-.forge-button-stage-2 {
-    border-color: #a16207;
-    background: rgba(120, 53, 15, 0.22);
-    color: #fef3c7;
-}
-
-.forge-button-stage-2:hover {
-    background: rgba(146, 64, 14, 0.32);
-    box-shadow: 0 0 16px rgba(217, 119, 6, 0.28);
-}
-
-/* Stade 3 : Ancestrale */
-.forge-button-stage-3 {
-    border-color: #ea580c;
-    background: rgba(154, 52, 18, 0.3);
-    color: #ffedd5;
-}
-
-.forge-button-stage-3:hover {
-    background: rgba(194, 65, 12, 0.42);
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.38);
-}
-
-/* Stade 4 : Transcendante */
-.forge-button-stage-4 {
-    border-color: #dc2626;
-    background: rgba(127, 29, 29, 0.35);
-    color: #fef2f2;
-}
-
-.forge-button-stage-4:hover {
-    background: rgba(153, 27, 27, 0.5);
-    box-shadow: 0 0 24px rgba(220, 38, 38, 0.4);
-}
-
-/* --- Effet de pression (doit rester après les :hover) --- */
-
-.forge-button:active {
-    transform: translateY(3px) scale(0.98);
-
-    box-shadow:
-        inset 0 3px 8px rgba(0, 0, 0, 0.55),
-        0 2px 5px rgba(0, 0, 0, 0.35);
-}
-
-/* =========================================================
-   9. GAIN DE FRAPPE
-   ========================================================= */
 
 .strike-gain {
     display: block;
@@ -546,7 +464,7 @@
 }
 
 /* =========================================================
-   10. PANNEAU AMÉLIORATIONS (braises)
+   9. PANNEAU AMÉLIORATIONS (braises)
    ========================================================= */
 
 .forge-upgrades-panel {
@@ -711,7 +629,7 @@
 }
 
 /* =========================================================
-   11. BARRE DE PROGRESSION
+   10. BARRE DE PROGRESSION
    ========================================================= */
 
 .forge-upgrade-progress {
@@ -762,7 +680,7 @@
 }
 
 /* =========================================================
-   12. MESSAGES (HORS LIGNE, ERREUR DE SAUVEGARDE)
+   11. MESSAGES (HORS LIGNE, ERREUR DE SAUVEGARDE)
    ========================================================= */
 
 .forge-offline-message {
@@ -808,7 +726,7 @@
 }
 
 /* =========================================================
-   13. CONNEXION ET COMPTE
+   12. CONNEXION ET COMPTE
    ========================================================= */
 
 .auth-loading {
@@ -927,7 +845,7 @@
 }
 
 /* =========================================================
-   14. TUTORIEL
+   13. TUTORIEL
    ========================================================= */
 
 /* --- Bulle d'aide --- */
@@ -1015,7 +933,7 @@
 }
 
 /* =========================================================
-   15. SCÈNE PIXIJS
+   14. SCÈNE PIXIJS
    ========================================================= */
 
 /* Derrière le contenu du panneau central, sans recevoir de clic. */

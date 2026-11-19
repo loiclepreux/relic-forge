@@ -1,4 +1,4 @@
-import { Container, Graphics } from "pixi.js";
+import { Container, Graphics, Text } from "pixi.js";
 import {
     ANVIL_AT_REST,
     anvilFrame,
@@ -27,11 +27,13 @@ export class AnvilActor {
     private readonly body = new Container();
     private readonly halo = new Graphics();
     private readonly heat = new Graphics();
+    private readonly label = drawLabel();
     private strikeAt = -Infinity;
     private strikeKind: StrikeKind = "normal";
+    private hovered = false;
 
     constructor() {
-        this.body.addChild(drawStand(), drawAnvil(), this.heat);
+        this.body.addChild(drawStand(), this.label, drawAnvil(), this.heat);
         this.view.addChild(this.halo, this.body);
         // Pivot au pied de l'enclume : elle s'écrase vers le sol.
         this.body.pivot.set(0, 70);
@@ -51,6 +53,12 @@ export class AnvilActor {
         this.strikeKind = kind;
         this.strikeAt = nowMs;
         this.drawHeat(kind === "critical" ? HEAT_CRITICAL : HEAT);
+    }
+
+    /** La souris (ou le clavier) est sur l'enclume : elle s'éclaire doucement. */
+    setHovered(hovered: boolean) {
+        this.hovered = hovered;
+        this.label.alpha = hovered ? 1 : 0.6;
     }
 
     update(nowMs: number, reducedMotion: boolean) {
@@ -82,7 +90,7 @@ export class AnvilActor {
     }) {
         this.body.scale.set(frame.scaleX, frame.scaleY);
         this.heat.alpha = 0.15 + 0.85 * frame.flash;
-        this.halo.alpha = frame.flash;
+        this.halo.alpha = Math.max(frame.flash, this.hovered ? 0.25 : 0);
     }
 
     private drawHeat(color: number) {
@@ -140,6 +148,25 @@ function drawAnvil(): Graphics {
         .lineTo(0, 17)
         .stroke({ color: STEEL_TOP, width: 1, alpha: 0.35 });
     return g;
+}
+
+/** « FRAPPER » gravé sur le socle : l'enclume est le bouton. */
+function drawLabel(): Text {
+    const label = new Text({
+        text: "FRAPPER",
+        style: {
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 13,
+            fontWeight: "700",
+            letterSpacing: 3,
+            fill: STEEL_TOP,
+        },
+        resolution: 2,
+    });
+    label.anchor.set(0.5);
+    label.position.set(0, 58);
+    label.alpha = 0.6;
+    return label;
 }
 
 /** Socle de pierre sous l'enclume. */

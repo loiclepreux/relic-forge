@@ -30,6 +30,9 @@ export function ForgeCanvas({ visualEvents, anchorRef }: Props) {
                 x: box.left - hostBox.left + box.width / 2,
                 y: box.top - hostBox.top + box.height / 2,
                 size: Math.min(box.width, box.height),
+                hovered:
+                    target.matches(":hover") ||
+                    target.matches(":focus-visible"),
             };
         };
 

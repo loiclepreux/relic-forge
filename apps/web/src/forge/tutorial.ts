@@ -35,8 +35,8 @@ export function getTutorialStep(
             return {
                 number: 1,
                 total: TOTAL,
-                title: "Frappe la Forge",
-                text: "Clique sur la Forge pour gagner des Échos. Chaque frappe en rapporte, et parfois un coup critique en double le gain.",
+                title: "Frappe l'enclume",
+                text: "Clique sur l'enclume pour gagner des Échos. Chaque frappe en rapporte, et parfois un coup critique en double le gain.",
                 target: "core",
             };
         }
