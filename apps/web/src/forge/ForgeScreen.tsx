@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { CRITICAL_CHANCE, CRITICAL_MULTIPLIER } from "@relic-forge/game-engine";
 import type { User } from "../api/authApi";
+import { useAudioSettings, useForgeAudio } from "./audio/useForgeAudio";
 import { ForgeCanvas } from "./ForgeCanvas";
 import { TutorialBubble } from "./tutorialBubble";
 import { getTutorialStep } from "./tutorial";
@@ -36,6 +37,8 @@ type Props = {
 /** L'écran de la Forge, alimenté par le serveur. */
 export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
     const forge = useServerForge(onSessionExpired);
+    const [audioSettings, setAudioSettings] = useAudioSettings();
+    useForgeAudio(forge.visualEvents, audioSettings);
 
     const [isStriking, setIsStriking] = useState(false);
     const [strikeGainShown, setStrikeGainShown] = useState<number | null>(null);
@@ -113,6 +116,15 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
 
             <div className="forge-account">
                 <span>{user.email}</span>
+                <button
+                    type="button"
+                    aria-pressed={!audioSettings.muted}
+                    onClick={() =>
+                        setAudioSettings((s) => ({ ...s, muted: !s.muted }))
+                    }
+                >
+                    {audioSettings.muted ? "🔇 Son coupé" : "🔊 Son"}
+                </button>
                 <button type="button" onClick={onLogout}>
                     Se déconnecter
                 </button>
