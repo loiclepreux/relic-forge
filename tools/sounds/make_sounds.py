@@ -49,25 +49,26 @@ def modal(f0, ratios, amps, decays, dur):
 
 def anvil(f0, dur=1.0, bright=1.0, ring=1.0):
     ratios=np.array([1, 2.32, 4.25, 6.63, 9.38])*(1+rng.uniform(-0.02,0.02,5))
-    amps=np.array([1, 0.6, 0.45*bright, 0.3*bright, 0.18*bright])*rng.uniform(0.8,1.2,5)
+    # Harmoniques aiguës discrètes : un coup plein, pas une clochette.
+    amps=np.array([1, 0.5, 0.22*bright, 0.1*bright, 0.05*bright])*rng.uniform(0.8,1.2,5)
     decays=np.array([0.45, 0.3, 0.18, 0.12, 0.08])*ring
     y=modal(f0, ratios, amps, decays, dur)
     # Contact du marteau : bruit bref et aigu.
-    n=rng.standard_normal(len(y)); click=bp(n, 2000, 9000)*np.exp(-t(dur)/0.006)*1.2
+    n=rng.standard_normal(len(y)); click=bp(n, 1200, 4500)*np.exp(-t(dur)/0.006)*0.6
     # Masse de l'enclume : choc grave.
-    thud=np.sin(2*np.pi*110*t(dur))*np.exp(-t(dur)/0.05)*0.9
-    return y+click+thud
+    thud=np.sin(2*np.pi*85*t(dur))*np.exp(-t(dur)/0.08)*1.4
+    return lp(y+click+thud, 5000)
 
 # 8 variantes de frappe
-bases=[1180,1250,1320,1400,1480,1560,1650,1740]
+bases=[430,455,480,510,540,570,600,640]
 for i,f in enumerate(bases):
     y=anvil(f*rng.uniform(0.98,1.02), dur=1.3)
     save(f'strike-{i+1}', norm(fade(reverb(y,0.6,0.15), r=0.08), 0.8))
 
 # Critique : plus brillant, plus long, double impact.
-y=anvil(1500, 2.6, bright=1.4, ring=2.2)
-y2=np.concatenate([np.zeros(int(0.03*SR)), anvil(2250, 2.6-0.03, bright=1.2, ring=1.6)*0.6])
-shimmer=modal(3000,[1,1.51,2.03],[0.3,0.2,0.12],[0.6,0.4,0.3],2.6)
+y=anvil(650, 2.6, bright=1.4, ring=2.2)
+y2=np.concatenate([np.zeros(int(0.03*SR)), anvil(980, 2.6-0.03, bright=1.2, ring=1.6)*0.6])
+shimmer=modal(1300,[1,1.51,2.03],[0.3,0.2,0.12],[0.6,0.4,0.3],2.6)
 save('critical', norm(fade(reverb(y+y2+shimmer,1.0,0.25), r=0.2), 0.85))
 
 def bell(f0, dur, decay=1.0):
