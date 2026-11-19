@@ -1,7 +1,8 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { ForgeVisualEvents } from "./visualEvents";
 import type { DisplaySettings } from "./settings/displaySettings";
-import { ForgeScene, type ForgeAnchor } from "./pixi/ForgeScene";
+// Type seulement : PixiJS lui-même est chargé à part, en différé (voir plus bas).
+import type { ForgeAnchor } from "./pixi/ForgeScene";
 import { startScene } from "./pixi/sceneLifecycle";
 
 type Props = {
@@ -53,14 +54,17 @@ export function ForgeCanvas({
             };
         };
 
-        return startScene(() =>
-            ForgeScene.create(host, {
+        // PixiJS est téléchargé à part : l'écran s'affiche sans l'attendre,
+        // l'enclume apparaît dès que la scène est prête.
+        return startScene(async () => {
+            const { ForgeScene } = await import("./pixi/ForgeScene");
+            return ForgeScene.create(host, {
                 visualEvents,
                 getAnchor,
                 getStage: () => stageRef.current,
                 getDisplay: () => displayRef.current,
-            }),
-        );
+            });
+        });
     }, [visualEvents, anchorRef]);
 
     return <div ref={hostRef} className="forge-canvas" aria-hidden="true" />;
