@@ -1,8 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CRITICAL_CHANCE, CRITICAL_MULTIPLIER } from "@relic-forge/game-engine";
 import type { User } from "../api/authApi";
 import { useAudioSettings, useForgeAudio } from "./audio/useForgeAudio";
 import { ForgeCanvas } from "./ForgeCanvas";
+import { isInteractiveElement, isStrikeKey } from "./settings/keyboard";
+import { SettingsPanel } from "./settings/SettingsPanel";
+import { useDisplaySettings } from "./settings/useDisplaySettings";
 import { TutorialBubble } from "./tutorialBubble";
 import { getTutorialStep } from "./tutorial";
 import { useServerForge } from "./useServerForge";
@@ -38,12 +41,31 @@ type Props = {
 export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
     const forge = useServerForge(onSessionExpired);
     const [audioSettings, setAudioSettings] = useAudioSettings();
-    useForgeAudio(forge.visualEvents, audioSettings);
+    const [display, setDisplay] = useDisplaySettings();
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    useForgeAudio(forge.visualEvents, audioSettings, display.reduceMotion);
 
     const [isStriking, setIsStriking] = useState(false);
     const [strikeGainShown, setStrikeGainShown] = useState<number | null>(null);
     const [showUpgradeFeedback, setShowUpgradeFeedback] = useState(false);
     const anvilRef = useRef<HTMLButtonElement>(null);
+
+    // Espace frappe l'enclume (sauf dans un champ, un bouton ou les réglages).
+    useEffect(() => {
+        if (settingsOpen) return;
+        const onKeyDown = (event: KeyboardEvent) => {
+            const press = {
+                code: event.code,
+                repeat: event.repeat,
+                targetIsInteractive: isInteractiveElement(event.target),
+            };
+            if (!isStrikeKey(press)) return;
+            event.preventDefault();
+            anvilRef.current?.click();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [settingsOpen]);
 
     const [tutorialSkipped, setTutorialSkipped] = useState(() =>
         readTutorialSkipped(user.id),
@@ -125,6 +147,9 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                 >
                     {audioSettings.muted ? "🔇 Son coupé" : "🔊 Son"}
                 </button>
+                <button type="button" onClick={() => setSettingsOpen(true)}>
+                    ⚙️ Réglages
+                </button>
                 <button type="button" onClick={onLogout}>
                     Se déconnecter
                 </button>
@@ -140,7 +165,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
             )}
 
             <section
-                className={`forge forge-stage-${stage} ${isStriking ? "forge-striking" : ""}`}
+                className={`forge forge-stage-${stage} ${isStriking && display.shake && !display.reduceMotion ? "forge-striking-shake" : ""} ${isStriking && display.flashes ? "forge-striking-flash" : ""}`}
             >
                 <div className="forge-stats-panel">
                     <h2>⚒️ Caractéristiques</h2>
@@ -175,6 +200,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                         visualEvents={forge.visualEvents}
                         anchorRef={anvilRef}
                         stage={stage}
+                        display={display}
                     />
                     {tutorial && (
                         <TutorialBubble step={tutorial} onSkip={skipTutorial} />
@@ -266,6 +292,15 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                     </button>
                 </div>
             </section>
+            {settingsOpen && (
+                <SettingsPanel
+                    display={display}
+                    onDisplayChange={setDisplay}
+                    audio={audioSettings}
+                    onAudioChange={setAudioSettings}
+                    onClose={() => setSettingsOpen(false)}
+                />
+            )}
         </main>
     );
 }

@@ -42,14 +42,17 @@ export class ForgeAudio {
     private lastStrike = -1;
     private settings: AudioSettings;
     private readonly unsubscribe: () => void;
-    private readonly reducedMotion: boolean;
+    /** Animations réduites : le marteau ne bouge pas, le son part tout de suite. */
+    private readonly getReducedMotion: () => boolean;
     private destroyed = false;
 
-    constructor(visualEvents: ForgeVisualEvents, settings: AudioSettings) {
+    constructor(
+        visualEvents: ForgeVisualEvents,
+        settings: AudioSettings,
+        getReducedMotion: () => boolean,
+    ) {
         this.settings = settings;
-        this.reducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
+        this.getReducedMotion = getReducedMotion;
         this.unsubscribe = visualEvents.subscribe(this.onVisualEvent);
         window.addEventListener("pointerdown", this.unlock);
         window.addEventListener("keydown", this.unlock);
@@ -146,7 +149,7 @@ export class ForgeAudio {
         this.lastStrike = pickVariant(STRIKE_VARIANTS, this.lastStrike);
         const { rate, gain } = strikeVariation();
         const voice = this.play(`strike-${this.lastStrike + 1}`, {
-            delay: this.reducedMotion ? 0 : HAMMER_IMPACT_MS / 1000,
+            delay: this.getReducedMotion() ? 0 : HAMMER_IMPACT_MS / 1000,
             rate,
             gain,
         });

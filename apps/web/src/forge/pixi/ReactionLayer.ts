@@ -45,6 +45,8 @@ export class ReactionLayer {
         y: number,
         scale: number,
         reducedMotion: boolean,
+        /** Atténuation des éclats de lumière (réglage du joueur). */
+        flashScale = 1,
     ) {
         for (const reaction of [...this.active]) {
             const frame = reactionFrame(
@@ -58,7 +60,7 @@ export class ReactionLayer {
             }
             reaction.view.position.set(x, y);
             reaction.view.scale.set(scale);
-            reaction.light.alpha = frame.lightAlpha;
+            reaction.light.alpha = frame.lightAlpha * flashScale;
             reaction.rune.alpha = frame.runeAlpha;
             reaction.rune.rotation = frame.runeRotation;
             reaction.ring.clear().circle(0, 0, frame.ringRadius).stroke({

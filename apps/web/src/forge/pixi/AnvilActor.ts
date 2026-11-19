@@ -61,10 +61,14 @@ export class AnvilActor {
         this.label.alpha = hovered ? 1 : 0.6;
     }
 
-    update(nowMs: number, reducedMotion: boolean) {
-        this.applyFrame(
-            anvilFrame(nowMs - this.strikeAt, this.strikeKind, reducedMotion),
+    /** `flashScale` atténue l'éclat (réglage « éclats de lumière »). */
+    update(nowMs: number, reducedMotion: boolean, flashScale = 1) {
+        const frame = anvilFrame(
+            nowMs - this.strikeAt,
+            this.strikeKind,
+            reducedMotion,
         );
+        this.applyFrame({ ...frame, flash: frame.flash * flashScale });
     }
 
     /** Place l'enclume sur la zone de frappe (centre et diamètre en pixels). */

@@ -1,5 +1,12 @@
 import { Application, Container, Graphics, type Ticker } from "pixi.js";
 import type { ForgeVisualEvent, ForgeVisualEvents } from "../visualEvents";
+import {
+    defaultDisplaySettings,
+    flashScale,
+    qualityProfile,
+    sparkDensity,
+    type DisplaySettings,
+} from "../settings/displaySettings";
 import { AmbianceLayer } from "./AmbianceLayer";
 import {
     STAGE_TRANSITION_MS,
@@ -49,6 +56,8 @@ export type ForgeSceneOptions = {
     getAnchor?: () => ForgeAnchor | null;
     /** Le stade actuel de la Forge (1 à 4) ; relu à chaque image. */
     getStage?: () => number;
+    /** Les réglages d'affichage et de confort ; relus à chaque image. */
+    getDisplay?: () => DisplaySettings;
 };
 
 /** Passage d'une ambiance à une autre, quand le stade change. */
@@ -73,7 +82,7 @@ export class ForgeScene {
     private readonly reactions: ReactionLayer;
     private readonly getAnchor: () => ForgeAnchor | null;
     private readonly unsubscribe: () => void;
-    private readonly reducedMotion: boolean;
+    private readonly getDisplay: () => DisplaySettings;
     private elapsedSeconds = 0;
     private destroyed = false;
 
@@ -86,9 +95,10 @@ export class ForgeScene {
         this.layers = layers;
         this.getAnchor = options.getAnchor ?? (() => null);
         this.getStage = options.getStage ?? (() => 1);
-        this.reducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
+        const fallback = defaultDisplaySettings(
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        );
+        this.getDisplay = options.getDisplay ?? (() => fallback);
 
         this.glow = new Graphics();
         this.layers.ambiance.addChild(this.glow);
@@ -153,6 +163,11 @@ export class ForgeScene {
         );
     }
 
+    /** Animations réduites (réglage du joueur). */
+    private get reducedMotion(): boolean {
+        return this.getDisplay().reduceMotion;
+    }
+
     private onVisualEvent = (event: ForgeVisualEvent) => {
         const now = performance.now();
         switch (event.type) {
@@ -188,8 +203,8 @@ export class ForgeScene {
             sparkBurst({
                 kind: impact.kind,
                 stage: impact.stage,
-                // Animations réduites : moitié moins d'étincelles.
-                density: this.reducedMotion ? 0.5 : 1,
+                // Selon la qualité choisie et le confort (animations réduites).
+                density: sparkDensity(this.getDisplay()),
             }),
         );
     }
@@ -271,12 +286,20 @@ export class ForgeScene {
         }
         this.pendingImpacts = this.pendingImpacts.filter((i) => i.at > now);
 
-        this.anvil.update(now, this.reducedMotion);
+        const display = this.getDisplay();
+        const flashes = flashScale(display);
+        const { motes } = qualityProfile(display.quality);
+        this.anvil.update(now, this.reducedMotion, flashes);
 
         const hotspot = this.anvil.hotspot();
         this.ambiance.update(
             dt,
-            ambiance,
+            // Qualité plus basse : moins de poussière et de braises.
+            {
+                ...ambiance,
+                dust: ambiance.dust * motes,
+                embers: ambiance.embers * motes,
+            },
             this.app.screen,
             { x: anchor.x, y: anchor.y, scale: hotspot.scale },
             this.reducedMotion,
@@ -289,6 +312,7 @@ export class ForgeScene {
             anchor.y,
             hotspot.scale,
             this.reducedMotion,
+            flashes,
         );
         this.sparks.update(dt, hotspot.x, hotspot.y, hotspot.scale);
     };
