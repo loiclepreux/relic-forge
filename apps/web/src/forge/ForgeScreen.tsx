@@ -162,6 +162,7 @@ export function ForgeScreen({ user, onLogout, onSessionExpired }: Props) {
                     <ForgeCanvas
                         visualEvents={forge.visualEvents}
                         anchorRef={anvilRef}
+                        stage={stage}
                     />
                     {tutorial && (
                         <TutorialBubble step={tutorial} onSkip={skipTutorial} />

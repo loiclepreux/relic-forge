@@ -8,14 +8,21 @@ type Props = {
     visualEvents: ForgeVisualEvents;
     /** La zone de frappe : l'enclume se dessine dessous. */
     anchorRef: RefObject<HTMLElement | null>;
+    /** Le stade de la Forge (1 à 4), qui choisit l'ambiance. */
+    stage: number;
 };
 
 /**
  * Le support de la scène PixiJS, placé derrière le contenu du panneau
  * central. Il ne reçoit aucun clic : la frappe reste sur les boutons.
  */
-export function ForgeCanvas({ visualEvents, anchorRef }: Props) {
+export function ForgeCanvas({ visualEvents, anchorRef, stage }: Props) {
     const hostRef = useRef<HTMLDivElement>(null);
+    // La scène lit le stade à chaque image : pas besoin de la recréer.
+    const stageRef = useRef(stage);
+    useEffect(() => {
+        stageRef.current = stage;
+    }, [stage]);
 
     useEffect(() => {
         const host = hostRef.current;
@@ -37,7 +44,11 @@ export function ForgeCanvas({ visualEvents, anchorRef }: Props) {
         };
 
         return startScene(() =>
-            ForgeScene.create(host, { visualEvents, getAnchor }),
+            ForgeScene.create(host, {
+                visualEvents,
+                getAnchor,
+                getStage: () => stageRef.current,
+            }),
         );
     }, [visualEvents, anchorRef]);
 

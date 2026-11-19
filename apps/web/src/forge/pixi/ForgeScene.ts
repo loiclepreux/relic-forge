@@ -1,5 +1,12 @@
 import { Application, Container, Graphics, type Ticker } from "pixi.js";
 import type { ForgeVisualEvent, ForgeVisualEvents } from "../visualEvents";
+import { AmbianceLayer } from "./AmbianceLayer";
+import {
+    STAGE_TRANSITION_MS,
+    ambianceForStage,
+    mixAmbiance,
+    type Ambiance,
+} from "./ambiance";
 import { AnvilActor } from "./AnvilActor";
 import { HammerActor } from "./HammerActor";
 import { HAMMER_IMPACT_MS } from "./hammerAnimation";
@@ -13,9 +20,10 @@ import type { StrikeKind } from "./anvilAnimation";
 const GLOW_RING_COUNT = 24;
 /** Rayon du plus grand cercle, en part de la hauteur de la scène. */
 const GLOW_MAX_RADIUS = 0.45;
-/** Opacité ajoutée par chaque cercle. */
-const GLOW_RING_ALPHA = 0.014;
-const GLOW_COLOR = 0xff8a2a;
+/** Opacité ajoutée par chaque cercle (lueur la plus forte, au stade 4). */
+const GLOW_RING_ALPHA = 0.018;
+/** Force de lueur qui correspond à GLOW_RING_ALPHA. */
+const GLOW_MAX_STRENGTH = 1.3;
 /** Une respiration lente, pour ne pas fatiguer l'œil (Bible 24.16). */
 const GLOW_BREATH_SECONDS = 4;
 
@@ -39,7 +47,12 @@ export type ForgeSceneOptions = {
     visualEvents?: ForgeVisualEvents;
     /** Où se trouve la zone de frappe ; relu à chaque image. */
     getAnchor?: () => ForgeAnchor | null;
+    /** Le stade actuel de la Forge (1 à 4) ; relu à chaque image. */
+    getStage?: () => number;
 };
+
+/** Passage d'une ambiance à une autre, quand le stade change. */
+type StageTransition = { from: Ambiance; to: Ambiance; startedAt: number };
 
 /**
  * La scène PixiJS de la Forge. Elle ne connaît rien de l'économie :
@@ -49,6 +62,10 @@ export class ForgeScene {
     readonly layers: Record<ForgeLayerName, Container>;
     private readonly app: Application;
     private readonly glow: Graphics;
+    private readonly ambiance: AmbianceLayer;
+    private readonly getStage: () => number;
+    private stage: number | null = null;
+    private transition: StageTransition | null = null;
     private readonly anvil: AnvilActor;
     private readonly hammer: HammerActor;
     private pendingImpacts: PendingImpact[] = [];
@@ -68,6 +85,7 @@ export class ForgeScene {
         this.app = app;
         this.layers = layers;
         this.getAnchor = options.getAnchor ?? (() => null);
+        this.getStage = options.getStage ?? (() => 1);
         this.reducedMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)",
         ).matches;
@@ -75,6 +93,10 @@ export class ForgeScene {
         this.glow = new Graphics();
         this.layers.ambiance.addChild(this.glow);
         this.drawGlow();
+
+        this.ambiance = new AmbianceLayer(this.app.renderer);
+        this.layers.background.addChild(this.ambiance.channels);
+        this.layers.ambiance.addChild(this.ambiance.motes);
 
         this.anvil = new AnvilActor();
         this.hammer = new HammerActor();
@@ -172,7 +194,10 @@ export class ForgeScene {
         );
     }
 
-    /** La lueur est redessinée seulement quand la scène change de taille. */
+    /**
+     * La lueur est redessinée seulement quand la scène change de taille.
+     * Dessinée en blanc : la couleur du stade est appliquée par teinte.
+     */
     private drawGlow = () => {
         const { height } = this.app.screen;
         this.glow.clear();
@@ -180,9 +205,41 @@ export class ForgeScene {
             const radius = (i / GLOW_RING_COUNT) * GLOW_MAX_RADIUS * height;
             this.glow
                 .circle(0, 0, radius)
-                .fill({ color: GLOW_COLOR, alpha: GLOW_RING_ALPHA });
+                .fill({ color: 0xffffff, alpha: GLOW_RING_ALPHA });
         }
     };
+
+    /** L'ambiance du moment : celle du stade, ou un mélange pendant un changement. */
+    private currentAmbiance(now: number): Ambiance {
+        const stage = this.getStage();
+        if (this.stage === null) {
+            // Premier affichage : directement l'ambiance du stade, sans transition.
+            this.stage = stage;
+        } else if (stage !== this.stage) {
+            this.transition = {
+                from: this.transition
+                    ? this.mixTransition(this.transition, now)
+                    : ambianceForStage(this.stage),
+                to: ambianceForStage(stage),
+                startedAt: now,
+            };
+            this.stage = stage;
+        }
+        if (!this.transition) return ambianceForStage(this.stage);
+        if (now - this.transition.startedAt >= STAGE_TRANSITION_MS) {
+            this.transition = null;
+            return ambianceForStage(this.stage);
+        }
+        return this.mixTransition(this.transition, now);
+    }
+
+    private mixTransition(transition: StageTransition, now: number): Ambiance {
+        return mixAmbiance(
+            transition.from,
+            transition.to,
+            (now - transition.startedAt) / STAGE_TRANSITION_MS,
+        );
+    }
 
     private update = (ticker: Ticker) => {
         this.elapsedSeconds += ticker.deltaMS / 1000;
@@ -199,10 +256,16 @@ export class ForgeScene {
         this.anvil.place(anchor.x, anchor.y, anchor.size);
         this.anvil.setHovered(anchor.hovered ?? false);
 
-        const phase = (this.elapsedSeconds / GLOW_BREATH_SECONDS) * Math.PI * 2;
-        this.glow.alpha = 0.8 + 0.2 * Math.sin(phase);
-
         const now = performance.now();
+        const ambiance = this.currentAmbiance(now);
+        const dt = Math.min(ticker.deltaMS / 1000, MAX_FRAME_SECONDS);
+
+        const phase = (this.elapsedSeconds / GLOW_BREATH_SECONDS) * Math.PI * 2;
+        this.glow.tint = ambiance.glowColor;
+        this.glow.alpha =
+            (0.8 + 0.2 * Math.sin(phase)) *
+            (ambiance.glowStrength / GLOW_MAX_STRENGTH);
+
         for (const impact of this.pendingImpacts.filter((i) => i.at <= now)) {
             this.impact(impact);
         }
@@ -211,6 +274,13 @@ export class ForgeScene {
         this.anvil.update(now, this.reducedMotion);
 
         const hotspot = this.anvil.hotspot();
+        this.ambiance.update(
+            dt,
+            ambiance,
+            this.app.screen,
+            { x: anchor.x, y: anchor.y, scale: hotspot.scale },
+            this.reducedMotion,
+        );
         this.hammer.place(anchor.x, anchor.y, hotspot.scale);
         this.hammer.update(now, this.reducedMotion);
         this.reactions.update(
@@ -220,11 +290,6 @@ export class ForgeScene {
             hotspot.scale,
             this.reducedMotion,
         );
-        this.sparks.update(
-            Math.min(ticker.deltaMS / 1000, MAX_FRAME_SECONDS),
-            hotspot.x,
-            hotspot.y,
-            hotspot.scale,
-        );
+        this.sparks.update(dt, hotspot.x, hotspot.y, hotspot.scale);
     };
 }
